@@ -1,225 +1,229 @@
-<div class="container mx-auto px-4 py-8 max-w-3xl">
-    <div class="mb-6">
-        <a routerLink="/tasks" class="text-brand-600 hover:text-brand-800 inline-flex items-center dark:text-brand-500 dark:hover:text-brand-400">
-            <i class="fas fa-arrow-left mr-2"></i> Back to Tasks
-        </a>
+<div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8 animate-fade-in">
+  <!-- Back Button -->
+  <div class="mb-2">
+    <a routerLink="/tasks" class="inline-flex items-center text-sm text-gray-500 hover:text-brand-600 dark:text-gray-400 dark:hover:text-brand-400 transition-colors font-medium">
+      <i class="fas fa-arrow-left mr-2 text-xs"></i> Back to Tasks
+    </a>
+  </div>
+
+  <!-- Page Header -->
+  <div class="border-b border-gray-200 dark:border-gray-800 pb-5">
+    <h1 class="text-2xl font-semibold text-gray-900 dark:text-white tracking-tight">New Task</h1>
+    <p class="text-sm text-gray-505 dark:text-gray-400 mt-1">Add a new task workspace description, assignment details, and subtask milestones.</p>
+  </div>
+
+  <!-- Form Body -->
+  <form [formGroup]="taskForm" (ngSubmit)="createTask()" class="space-y-6">
+    <!-- Task Title -->
+    <div class="space-y-1">
+      <label for="title" class="block text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+        Task Title <span class="text-red-500">*</span>
+      </label>
+      <input 
+        type="text" 
+        id="title"
+        formControlName="title" 
+        placeholder="Enter a descriptive title..." 
+        class="w-full px-3.5 py-2.5 text-base border border-gray-300 dark:border-gray-700 rounded-lg bg-transparent focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 dark:text-white dark:bg-gray-900"
+      >
+      @if (taskForm.get('title')?.invalid && (taskForm.get('title')?.touched || taskForm.get('title')?.dirty)) {
+        <div class="text-red-500 text-xs mt-1.5 flex items-center gap-1">
+          <i class="fas fa-exclamation-circle text-[10px]"></i>
+          @if (taskForm.get('title')?.errors?.['required']) {
+            <span>Title is required</span>
+          }
+          @if (taskForm.get('title')?.errors?.['minlength']) {
+            <span>Title must be at least 3 characters</span>
+          }
+        </div>
+      }
+    </div>
+    
+    <!-- Description -->
+    <div class="space-y-1.5">
+      <div class="flex justify-between items-center">
+        <label for="description" class="block text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+          Description <span class="text-red-500">*</span>
+        </label>
+        <button type="button" (click)="aiImproveDescription()" [disabled]="aiLoading().description" class="inline-flex items-center justify-center px-2.5 py-1 text-xs font-semibold text-brand-600 dark:text-brand-400 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-md border border-gray-200 dark:border-gray-800 transition-colors disabled:opacity-50">
+          @if (aiLoading().description) {
+            <i class="fas fa-spinner fa-spin mr-1.5"></i> Improving...
+          } @else {
+            <i class="fas fa-wand-magic-sparkles mr-1.5 text-[10px]"></i> AI Improve
+          }
+        </button>
+      </div>
+      <textarea 
+        id="description"
+        formControlName="description" 
+        rows="5" 
+        placeholder="Provide a detailed description of the task requirements..." 
+        class="w-full px-3.5 py-2.5 text-sm border border-gray-300 dark:border-gray-700 rounded-lg bg-transparent focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 dark:text-white dark:bg-gray-900"
+      ></textarea>
+      @if (taskForm.get('description')?.invalid && (taskForm.get('description')?.touched || taskForm.get('description')?.dirty)) {
+        <div class="text-red-500 text-xs mt-1.5 flex items-center gap-1">
+          <i class="fas fa-exclamation-circle text-[10px]"></i>
+          @if (taskForm.get('description')?.errors?.['required']) {
+            <span>Description is required</span>
+          }
+          @if (taskForm.get('description')?.errors?.['minlength']) {
+            <span>Description must be at least 3 characters</span>
+          }
+        </div>
+      }
+    </div>
+    
+    <!-- Metadata Grid (3 columns) -->
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-6">
+      <!-- Deadline -->
+      <div class="space-y-1">
+        <label for="deadline" class="block text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+          Deadline <span class="text-red-500">*</span>
+        </label>
+        <div class="relative">
+          <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400 dark:text-gray-500">
+            <i class="far fa-calendar-alt text-xs"></i>
+          </div>
+          <input 
+            type="date" 
+            id="deadline"
+            formControlName="deadline" 
+            [min]="minDate" 
+            class="w-full pl-9 pr-3.5 py-2.5 text-sm border border-gray-300 dark:border-gray-700 rounded-lg bg-transparent focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 dark:text-white dark:bg-gray-900"
+          >
+        </div>
+        @if (taskForm.get('deadline')?.invalid && (taskForm.get('deadline')?.touched || taskForm.get('deadline')?.dirty)) {
+          <div class="text-red-500 text-xs mt-1.5 flex items-center gap-1">
+            <i class="fas fa-exclamation-circle text-[10px]"></i>
+            <span>Deadline is required</span>
+          </div>
+        }
+      </div>
+      
+      <!-- Priority -->
+      <div class="space-y-1">
+        <div class="flex justify-between items-center">
+          <label for="priority" class="block text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+            Priority <span class="text-red-500">*</span>
+          </label>
+          <button type="button" (click)="aiSuggestPriority()" [disabled]="aiLoading().priority" class="inline-flex items-center text-xs font-semibold text-brand-600 dark:text-brand-400 hover:underline disabled:opacity-50">
+            @if (aiLoading().priority) {
+              <i class="fas fa-spinner fa-spin mr-1"></i>
+            } @else {
+              <i class="fas fa-wand-magic-sparkles mr-1 text-[10px]"></i> AI Suggest
+            }
+          </button>
+        </div>
+        <div class="relative">
+          <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400 dark:text-gray-500">
+            <i class="fas fa-flag text-xs"></i>
+          </div>
+          <select 
+            id="priority"
+            formControlName="priority" 
+            class="w-full pl-9 pr-10 py-2.5 text-sm border border-gray-300 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 dark:text-white appearance-none"
+          >
+            <option value="" disabled selected>Select priority</option>
+            <option value="Low">Low</option>
+            <option value="Medium">Medium</option>
+            <option value="High">High</option>
+          </select>
+        </div>
+        @if (taskForm.get('priority')?.invalid && (taskForm.get('priority')?.touched || taskForm.get('priority')?.dirty)) {
+          <div class="text-red-500 text-xs mt-1.5 flex items-center gap-1">
+            <i class="fas fa-exclamation-circle text-[10px]"></i>
+            <span>Priority is required</span>
+          </div>
+        }
+      </div>
+
+      <!-- Assignee -->
+      <div class="space-y-1">
+        <label for="userId" class="block text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+          Assign To <span class="text-red-500">*</span>
+        </label>
+        <div class="relative">
+          <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400 dark:text-gray-500">
+            <i class="fas fa-user text-xs"></i>
+          </div>
+          <select 
+            id="userId"
+            formControlName="userId" 
+            class="w-full pl-9 pr-10 py-2.5 text-sm border border-gray-300 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 dark:text-white appearance-none"
+          >
+            <option value="" disabled selected>Select user</option>
+            @for (user of users; track user._id) {
+              <option [value]="user._id">{{ user.email }}</option>
+            }
+          </select>
+        </div>
+        @if (taskForm.get('userId')?.invalid && (taskForm.get('userId')?.touched || taskForm.get('userId')?.dirty)) {
+          <div class="text-red-500 text-xs mt-1.5 flex items-center gap-1">
+            <i class="fas fa-exclamation-circle text-[10px]"></i>
+            <span>Assignee is required</span>
+          </div>
+        }
+      </div>
     </div>
 
-    <div class="bg-white rounded-xl shadow-md overflow-hidden dark:bg-gray-800">
-        <div class="bg-gradient-to-r from-brand-500 to-brand-700 p-6">
-            <h2 class="text-2xl font-bold text-white flex items-center">
-                <i class="fas fa-plus-circle mr-2"></i> Create New Task
-            </h2>
-            <p class="text-brand-100 mt-1">Fill in the details below to create a task</p>
+    <!-- Subtasks Checklist Section -->
+    <div class="border border-gray-200 dark:border-gray-800 rounded-xl p-5 bg-white dark:bg-gray-900 shadow-sm space-y-4">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-gray-100 dark:border-gray-800">
+        <label class="block text-sm font-semibold text-gray-900 dark:text-white uppercase tracking-wider">
+          Subtasks / Checklist
+        </label>
+        <div class="flex items-center gap-2.5">
+          <button type="button" (click)="aiSuggestSubtasks()" [disabled]="aiLoading().subtasks" class="inline-flex items-center justify-center px-3 py-1.5 text-xs font-semibold text-brand-600 dark:text-brand-400 hover:bg-gray-50 dark:hover:bg-gray-800 border border-gray-250 dark:border-gray-800 rounded-lg transition-colors disabled:opacity-50">
+            @if (aiLoading().subtasks) {
+              <i class="fas fa-spinner fa-spin mr-1.5"></i> Generating...
+            } @else {
+              <i class="fas fa-wand-magic-sparkles mr-1.5 text-[10px]"></i> AI Suggest
+            }
+          </button>
+          <button type="button" (click)="addSubtask()" class="inline-flex items-center justify-center px-3 py-1.5 text-xs font-semibold text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 hover:bg-gray-50 dark:hover:bg-gray-800 rounded-lg transition-colors">
+            <i class="fas fa-plus mr-1 text-[10px]"></i> Add Task
+          </button>
         </div>
-        
-        <div class="p-6">
-            <form [formGroup]="taskForm" (ngSubmit)="createTask()" class="space-y-6">
-                <!-- Title -->
-                <div>
-                    <label for="title" class="block text-sm font-medium text-gray-700 mb-1 dark:text-gray-300">Task Title <span class="text-red-500">*</span></label>
-                    <input 
-                        type="text" 
-                        id="title"
-                        formControlName="title" 
-                        placeholder="Enter a descriptive title" 
-                        class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-brand-500 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100 dark:focus:ring-brand-400"
-                    >
-                    @if (taskForm.get('title')?.invalid && (taskForm.get('title')?.touched || taskForm.get('title')?.dirty)) {
-                        <div class="mt-1 text-sm text-red-600">
-                            @if (taskForm.get('title')?.errors?.['required']) {
-                                <p><i class="fas fa-info-circle mr-1"></i>Title is required</p>
-                            }
-                            @if (taskForm.get('title')?.errors?.['minlength']) {
-                                <p><i class="fas fa-info-circle mr-1"></i>Title must be at least 3 characters</p>
-                            }
-                        </div>
-                    }
-                </div>
-                
-                <!-- Description -->
-                <div>
-                    <div class="flex justify-between items-center mb-1">
-                        <label for="description" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Description <span class="text-red-500">*</span></label>
-                        <button type="button" (click)="aiImproveDescription()" [disabled]="aiLoading().description" class="inline-flex items-center px-2.5 py-1 text-xs font-semibold bg-brand-50 text-brand-700 rounded-lg hover:bg-brand-100 transition-colors disabled:opacity-50 dark:bg-brand-900/30 dark:text-brand-400 dark:hover:bg-brand-900/50">
-                            @if (aiLoading().description) {
-                                <i class="fas fa-spinner fa-spin mr-1"></i> Improving...
-                            } @else {
-                                <i class="fas fa-wand-magic-sparkles mr-1"></i> AI Improve
-                            }
-                        </button>
-                    </div>
-                    <textarea 
-                        id="description"
-                        formControlName="description" 
-                        rows="4" 
-                        placeholder="Provide a detailed description of the task" 
-                        class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-brand-500 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100 dark:focus:ring-brand-400"
-                    ></textarea>
-                    @if (taskForm.get('description')?.invalid && (taskForm.get('description')?.touched || taskForm.get('description')?.dirty)) {
-                        <div class="mt-1 text-sm text-red-600">
-                            @if (taskForm.get('description')?.errors?.['required']) {
-                                <p><i class="fas fa-info-circle mr-1"></i>Description is required</p>
-                            }
-                            @if (taskForm.get('description')?.errors?.['minlength']) {
-                                <p><i class="fas fa-info-circle mr-1"></i>Description must be at least 3 characters</p>
-                            }
-                        </div>
-                    }
-                </div>
-                
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <!-- Deadline -->
-                    <div>
-                        <label for="deadline" class="block text-sm font-medium text-gray-700 mb-1 dark:text-gray-300">Deadline <span class="text-red-500">*</span></label>
-                        <div class="relative">
-                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                <i class="far fa-calendar-alt text-gray-400 dark:text-gray-400"></i>
-                            </div>
-                            <input 
-                                type="date" 
-                                id="deadline"
-                                formControlName="deadline" 
-                                [min]="minDate" 
-                                class="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-brand-500 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100 dark:focus:ring-brand-400"
-                            >
-                        </div>
-                        @if (taskForm.get('deadline')?.invalid && (taskForm.get('deadline')?.touched || taskForm.get('deadline')?.dirty)) {
-                            <div class="mt-1 text-sm text-red-600">
-                                @if (taskForm.get('deadline')?.errors?.['required']) {
-                                    <p><i class="fas fa-info-circle mr-1"></i>Deadline is required</p>
-                                }
-                            </div>
-                        }
-                    </div>
-                    
-                    <!-- Priority -->
-                    <div>
-                        <div class="flex justify-between items-center mb-1">
-                            <label for="priority" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Priority <span class="text-red-500">*</span></label>
-                            <button type="button" (click)="aiSuggestPriority()" [disabled]="aiLoading().priority" class="inline-flex items-center px-2 py-0.5 text-xs font-semibold bg-brand-50 text-brand-700 rounded-lg hover:bg-brand-100 transition-colors disabled:opacity-50 dark:bg-brand-900/30 dark:text-brand-400 dark:hover:bg-brand-900/50">
-                                @if (aiLoading().priority) {
-                                    <i class="fas fa-spinner fa-spin mr-1"></i>
-                                } @else {
-                                    <i class="fas fa-wand-magic-sparkles mr-1"></i> AI
-                                }
-                            </button>
-                        </div>
-                        <div class="relative">
-                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                <i class="fas fa-flag text-gray-400 dark:text-gray-400"></i>
-                            </div>
-                            <select 
-                                id="priority"
-                                formControlName="priority" 
-                                class="w-full pl-10 pr-10 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-brand-500 appearance-none dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100 dark:focus:ring-brand-400"
-                            >
-                                <option value="" disabled selected>Select priority</option>
-                                <option value="Low">Low</option>
-                                <option value="Medium">Medium</option>
-                                <option value="High">High</option>
-                            </select>
-                            <div class="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none">
-                                <i class="fas fa-chevron-down text-gray-400 dark:text-gray-400"></i>
-                            </div>
-                        </div>
-                        @if (taskForm.get('priority')?.invalid && (taskForm.get('priority')?.touched || taskForm.get('priority')?.dirty)) {
-                            <div class="mt-1 text-sm text-red-600">
-                                @if (taskForm.get('priority')?.errors?.['required']) {
-                                    <p><i class="fas fa-info-circle mr-1"></i>Priority is required</p>
-                                }
-                            </div>
-                        }
-                    </div>
-                </div>
-                
-                <!-- Assignee -->
-                <div>
-                    <label for="userId" class="block text-sm font-medium text-gray-700 mb-1 dark:text-gray-300">Assign To <span class="text-red-500">*</span></label>
-                    <div class="relative">
-                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                            <i class="fas fa-user text-gray-400 dark:text-gray-400"></i>
-                        </div>
-                        <select 
-                            id="userId"
-                            formControlName="userId" 
-                            class="w-full pl-10 pr-10 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-brand-500 appearance-none dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100 dark:focus:ring-brand-400"
-                        >
-                            <option value="" disabled selected>Select user</option>
-                            @for (user of users; track user._id) {
-                                <option [value]="user._id">{{ user.email }}</option>
-                            }
-                        </select>
-                        <div class="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none">
-                            <i class="fas fa-chevron-down text-gray-400 dark:text-gray-400"></i>
-                        </div>
-                    </div>
-                    @if (taskForm.get('userId')?.invalid && (taskForm.get('userId')?.touched || taskForm.get('userId')?.dirty)) {
-                        <div class="mt-1 text-sm text-red-600">
-                            @if (taskForm.get('userId')?.errors?.['required']) {
-                                <p><i class="fas fa-info-circle mr-1"></i>Assignee is required</p>
-                            }
-                        </div>
-                    }
-                </div>
-
-                <!-- Subtasks -->
-                <div class="bg-gray-50 p-4 rounded-lg border border-gray-200 dark:bg-black dark:border-gray-700">
-                    <div class="flex justify-between items-center mb-4">
-                        <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300">
-                            <i class="fas fa-list-ul mr-2 text-brand-500"></i>Subtasks / Checklist
-                        </label>
-                        <div class="flex gap-2">
-                            <button type="button" (click)="aiSuggestSubtasks()" [disabled]="aiLoading().subtasks" class="inline-flex items-center px-3 py-1 bg-brand-100 text-brand-700 text-xs font-bold rounded-full hover:bg-brand-200 transition-colors disabled:opacity-50 dark:bg-brand-900 dark:text-brand-400">
-                                @if (aiLoading().subtasks) {
-                                    <i class="fas fa-spinner fa-spin mr-1"></i> Generating...
-                                } @else {
-                                    <i class="fas fa-wand-magic-sparkles mr-1"></i> AI SUGGEST
-                                }
-                            </button>
-                            <button type="button" (click)="addSubtask()" class="inline-flex items-center px-3 py-1 bg-brand-100 text-brand-700 text-xs font-bold rounded-full hover:bg-brand-200 transition-colors dark:bg-brand-900 dark:text-brand-400">
-                                <i class="fas fa-plus mr-1"></i> ADD NEW
-                            </button>
-                        </div>
-                    </div>
-                    
-                    <div formArrayName="subtasks" class="space-y-3">
-                        @if (subtasks.controls.length === 0) {
-                            <p class="text-xs text-center text-gray-500 italic py-2 dark:text-gray-400">No subtasks added yet.</p>
-                        }
-                        @for (subtask of subtasks.controls; track $index) {
-                            <div [formGroupName]="$index" class="flex items-center gap-3 bg-white p-3 rounded-md shadow-sm border border-gray-100 group dark:bg-gray-800 dark:border-gray-700">
-                                <div class="flex items-center h-5">
-                                    <input type="checkbox" formControlName="completed" class="h-4 w-4 text-brand-600 border-gray-300 rounded focus:ring-brand-500 cursor-pointer dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100 dark:focus:ring-brand-400">
-                                </div>
-                                <div class="flex-grow">
-                                    <input 
-                                        type="text" 
-                                        formControlName="title" 
-                                        placeholder="What needs to be done?" 
-                                        class="w-full bg-transparent border-0 border-b border-transparent focus:border-brand-400 focus:ring-0 text-sm py-0.5 placeholder-gray-400 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-100"
-                                        [ngClass]="{'line-through text-gray-400': subtask.get('completed')?.value}"
-                                    >
-                                </div>
-                                <button type="button" (click)="removeSubtask($index)" class="text-gray-400 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity dark:text-gray-400">
-                                    <i class="fas fa-trash-alt"></i>
-                                </button>
-                            </div>
-                        }
-                    </div>
-                </div>
-                
-                <div class="pt-4">
-                    <button 
-                        type="submit" 
-                        class="w-full flex justify-center items-center px-4 py-3 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-brand-600 hover:bg-brand-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-500 transition-colors" 
-                        [disabled]="taskForm.invalid"
-                        [ngClass]="{'opacity-50 cursor-not-allowed': taskForm.invalid}"
-                    >
-                        <i class="fas fa-plus-circle mr-2"></i> Create Task
-                    </button>
-                </div>
-            </form>
-        </div>
+      </div>
+      
+      <div formArrayName="subtasks" class="divide-y divide-gray-100 dark:divide-gray-800">
+        @if (subtasks.controls.length === 0) {
+          <p class="text-xs text-center text-gray-400 dark:text-gray-500 py-6 italic">No subtasks added to this checklist.</p>
+        }
+        @for (subtask of subtasks.controls; track $index) {
+          <div [formGroupName]="$index" class="flex items-center gap-3 py-3.5 group">
+            <div class="flex items-center h-5">
+              <input type="checkbox" formControlName="completed" class="h-4 w-4 text-brand-600 border-gray-300 rounded focus:ring-brand-500/20 cursor-pointer dark:border-gray-600 dark:bg-gray-800">
+            </div>
+            <div class="flex-grow">
+              <input 
+                type="text" 
+                formControlName="title" 
+                placeholder="Checklist item description..." 
+                class="w-full bg-transparent border-0 border-b border-transparent focus:border-brand-500 focus:ring-0 text-sm py-0.5 placeholder-gray-400 dark:text-white"
+                [ngClass]="{'line-through text-gray-400 dark:text-gray-600': subtask.get('completed')?.value}"
+              >
+            </div>
+            <button type="button" (click)="removeSubtask($index)" class="text-gray-400 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity">
+              <i class="fas fa-trash-alt text-sm"></i>
+            </button>
+          </div>
+        }
+      </div>
     </div>
+    
+    <!-- Action Controls -->
+    <div class="border-t border-gray-200 dark:border-gray-800 pt-6 flex items-center justify-end gap-3">
+      <a routerLink="/tasks" class="px-4.5 py-2.5 border border-gray-200 dark:border-gray-700 rounded-lg text-sm font-semibold text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
+        Cancel
+      </a>
+      <button 
+        type="submit" 
+        class="inline-flex items-center justify-center px-5 py-2.5 border border-transparent rounded-lg shadow-sm text-sm font-semibold text-white bg-brand-600 hover:bg-brand-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed" 
+        [disabled]="taskForm.invalid"
+      >
+        <i class="fas fa-plus-circle mr-1.5 text-xs"></i> Create Task
+      </button>
+    </div>
+  </form>
 </div>

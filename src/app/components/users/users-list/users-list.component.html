@@ -3,7 +3,7 @@
   <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center border-b border-gray-200 dark:border-gray-800 pb-5 gap-4">
     <div>
       <h1 class="text-2xl font-semibold text-gray-900 dark:text-gray-100 tracking-tight">Users</h1>
-      <p class="text-sm text-gray-550 dark:text-gray-400 mt-1">Manage system access, roles, and platform permissions.</p>
+      <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Manage system access, roles, and platform permissions.</p>
     </div>
   </div>
 
@@ -17,7 +17,7 @@
 
   <!-- Error State -->
   @else if(error()) {
-    <div class="rounded-xl border border-red-200 bg-red-50/50 p-4 text-red-808 mb-6 text-sm" role="alert">
+    <div class="rounded-xl border border-red-200 bg-red-50/50 p-4 text-red-800 mb-6 text-sm" role="alert">
       <div class="flex items-center gap-2.5">
         <i class="fas fa-exclamation-circle text-lg"></i>
         <h3 class="font-semibold text-sm">Failed to load directory</h3>
@@ -45,7 +45,7 @@
       <div class="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl shadow-sm overflow-hidden">
         <!-- Sub-header -->
         <div class="px-5 py-4 border-b border-gray-200 dark:border-gray-800 flex items-center justify-between">
-          <h3 class="text-sm font-semibold text-gray-955 dark:text-gray-100 uppercase tracking-wider">Directory</h3>
+          <h3 class="text-sm font-semibold text-gray-900 dark:text-gray-100 uppercase tracking-wider">Directory</h3>
           <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-300">
             {{ totalUsers() }} users
           </span>
@@ -61,10 +61,10 @@
             </thead>
             <tbody class="divide-y divide-gray-200 dark:divide-gray-800">
               @for (user of paginatedUsers(); track user._id) {
-                <tr class="hover:bg-gray-50/50 dark:hover:bg-gray-850/30 transition-colors">
+                <tr class="hover:bg-gray-50/50 dark:hover:bg-gray-800/30 transition-colors">
                   <td class="px-6 py-4 whitespace-nowrap">
                     <div class="flex items-center gap-3">
-                      <div class="h-8 w-8 rounded-full bg-gray-100 dark:bg-gray-800 border border-gray-205 dark:border-gray-700 flex items-center justify-center text-gray-500 dark:text-gray-400">
+                      <div class="h-8 w-8 rounded-full bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 flex items-center justify-center text-gray-500 dark:text-gray-400">
                         <i class="far fa-user text-xs"></i>
                       </div>
                       <div class="font-medium text-gray-900 dark:text-white">
@@ -76,7 +76,7 @@
                     <span [ngClass]="{
                       'bg-purple-50 text-purple-700 border-purple-200/50 dark:bg-purple-950/20 dark:text-purple-400 dark:border-purple-900/30': user.role === 'admin',
                       'bg-gray-100 text-gray-705 border-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:border-gray-700': user.role === 'user',
-                      'bg-amber-50 text-amber-700 border-amber-205/50 dark:bg-amber-955/20 dark:text-amber-400 dark:border-amber-900/30': user.role === 'super'
+                      'bg-amber-50 text-amber-700 border-amber-200/50 dark:bg-amber-900/20 dark:text-amber-400 dark:border-amber-900/30': user.role === 'super'
                     }" class="inline-flex items-center px-2 py-0.5 text-xs font-medium rounded-md border">
                       {{ user.role }}
                     </span>

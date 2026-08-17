@@ -7,52 +7,6 @@
             </a>
         }
     </div>
-
-    <!-- Search and Filters -->
-    <div class="bg-white p-4 rounded-2xl shadow-sm border border-gray-100 mb-8 flex flex-col md:flex-row gap-4 items-center dark:bg-gray-800 dark:border-gray-700">
-        <div class="relative flex-grow w-full">
-            <i class="fas fa-search absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-400"></i>
-            <input 
-                type="text" 
-                [(ngModel)]="searchQuery" 
-                (ngModelChange)="onSearchChange()"
-                placeholder="Search tasks by title or description..." 
-                class="w-full pl-12 pr-4 py-3 rounded-xl border-none bg-gray-50 focus:ring-2 focus:ring-brand-500 transition-all font-medium text-gray-700 dark:bg-black dark:text-gray-300 dark:text-white dark:focus:ring-brand-400 dark:border-gray-700"
-            >
-        </div>
-        
-        <div class="flex gap-2 w-full md:w-auto">
-            <select 
-                [(ngModel)]="priorityFilter" 
-                (change)="onFilterChange()"
-                class="bg-gray-50 border-none rounded-xl px-4 py-3 font-bold text-xs uppercase tracking-wider text-gray-500 focus:ring-2 focus:ring-brand-500 cursor-pointer dark:bg-black dark:text-gray-400 dark:border-gray-700 dark:focus:ring-brand-400"
-            >
-                <option value="">All Priorities</option>
-                <option value="High">High Only</option>
-                <option value="Medium">Medium Only</option>
-                <option value="Low">Low Only</option>
-            </select>
-
-            <select 
-                [(ngModel)]="sortBy" 
-                (change)="onFilterChange()"
-                class="bg-gray-50 border-none rounded-xl px-4 py-3 font-bold text-xs uppercase tracking-wider text-gray-500 focus:ring-2 focus:ring-brand-500 cursor-pointer dark:bg-black dark:text-gray-400 dark:border-gray-700 dark:focus:ring-brand-400"
-            >
-                <option value="deadline">By Deadline</option>
-                <option value="createdAt">By Created Date</option>
-                <option value="priority">By Priority</option>
-            </select>
-
-            <button 
-                (click)="toggleSortOrder()"
-                class="bg-gray-50 hover:bg-gray-100 p-3 rounded-xl text-gray-400 transition-colors dark:bg-black dark:text-gray-400 dark:hover:bg-gray-800"
-                [title]="sortOrder() === 'asc' ? 'Ascending' : 'Descending'"
-            >
-                <i class="fas" [ngClass]="sortOrder() === 'asc' ? 'fa-sort-amount-down-alt' : 'fa-sort-amount-up'"></i>
-            </button>
-        </div>
-    </div>
-
     <!-- Loading State -->
     @if(completedLoading() || pendingLoading()) {
         <div class="flex items-center justify-center p-12">
@@ -81,15 +35,15 @@
 
     <!-- Tasks Content -->
     @else {
-        <!-- Tabs -->
-        <div class="mb-6 border-b border-gray-200 dark:border-gray-700">
+        <!-- Tabs & Filters Row -->
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-center border-b border-gray-200 dark:border-gray-700 pb-2.5 md:pb-0 gap-4 mb-6">
             <nav class="-mb-px flex space-x-8" aria-label="Tabs">
                 <button (click)="activeTab.set('ongoing')"
                         [class.border-brand-500]="activeTab() === 'ongoing'"
                         [class.text-brand-600]="activeTab() === 'ongoing'"
                         [class.border-transparent]="activeTab() !== 'ongoing'"
                         [class.text-gray-500]="activeTab() !== 'ongoing'"
-                        class="whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm transition-colors hover:text-gray-700 dark:hover:text-gray-300">
+                        class="whitespace-nowrap py-3 px-1 border-b-2 font-medium text-sm transition-colors hover:text-gray-700 dark:hover:text-gray-300">
                     <i class="fas fa-spinner mr-2"></i> Ongoing Tasks
                     <span class="ml-2 bg-brand-50 text-brand-600 py-0.5 px-2.5 rounded-full text-xs font-bold dark:bg-brand-900/30 dark:text-brand-400">{{ pendingTotalTasks() || pendingTasks().length }}</span>
                 </button>
@@ -98,11 +52,58 @@
                         [class.text-green-600]="activeTab() === 'completed'"
                         [class.border-transparent]="activeTab() !== 'completed'"
                         [class.text-gray-500]="activeTab() !== 'completed'"
-                        class="whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm transition-colors hover:text-gray-700 dark:hover:text-gray-300">
+                        class="whitespace-nowrap py-3 px-1 border-b-2 font-medium text-sm transition-colors hover:text-gray-700 dark:hover:text-gray-300">
                     <i class="fas fa-check-circle mr-2"></i> Completed Tasks
                     <span class="ml-2 bg-green-50 text-green-600 py-0.5 px-2.5 rounded-full text-xs font-bold dark:bg-green-900/30 dark:text-green-400">{{ completedTotalTasks() || completedTasks().length }}</span>
                 </button>
             </nav>
+
+            <!-- Inline Filters -->
+            <div class="flex flex-wrap items-center gap-2 w-full md:w-auto md:pb-2">
+                <!-- Search -->
+                <div class="relative flex-grow sm:flex-grow-0 sm:w-60">
+                    <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500 text-xs"></i>
+                    <input 
+                        type="text" 
+                        [(ngModel)]="searchQuery" 
+                        (ngModelChange)="onSearchChange()"
+                        placeholder="Search tasks..." 
+                        class="w-full pl-9 pr-3 py-1.5 text-xs rounded-lg border border-gray-200 dark:border-gray-700 bg-transparent focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 dark:text-white dark:bg-gray-900"
+                    >
+                </div>
+
+                <!-- Priority Filter -->
+                <select 
+                    [(ngModel)]="priorityFilter" 
+                    (change)="onFilterChange()"
+                    class="bg-transparent border border-gray-200 dark:border-gray-700 rounded-lg px-2.5 py-1.5 text-xs font-semibold uppercase tracking-wider text-gray-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 cursor-pointer dark:bg-gray-900 dark:text-gray-400"
+                >
+                    <option value="">All Priorities</option>
+                    <option value="High">High</option>
+                    <option value="Medium">Medium</option>
+                    <option value="Low">Low</option>
+                </select>
+
+                <!-- Sort By -->
+                <select 
+                    [(ngModel)]="sortBy" 
+                    (change)="onFilterChange()"
+                    class="bg-transparent border border-gray-200 dark:border-gray-700 rounded-lg px-2.5 py-1.5 text-xs font-semibold uppercase tracking-wider text-gray-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 cursor-pointer dark:bg-gray-900 dark:text-gray-400"
+                >
+                    <option value="deadline">Deadline</option>
+                    <option value="createdAt">Created Date</option>
+                    <option value="priority">Priority</option>
+                </select>
+
+                <!-- Sort Toggle -->
+                <button 
+                    (click)="toggleSortOrder()"
+                    class="border border-gray-200 dark:border-gray-700 hover:bg-gray-50 p-1.5 rounded-lg text-gray-400 hover:text-gray-600 transition-colors dark:bg-gray-900 dark:hover:bg-gray-800"
+                    [title]="sortOrder() === 'asc' ? 'Ascending' : 'Descending'"
+                >
+                    <i class="fas text-xs" [ngClass]="sortOrder() === 'asc' ? 'fa-sort-amount-down-alt' : 'fa-sort-amount-up'"></i>
+                </button>
+            </div>
         </div>
 
         <div class="tab-view fade-in animate-fade-in">

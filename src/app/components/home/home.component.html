@@ -1,77 +1,143 @@
-<main class="flex-grow container mx-auto px-4 py-8">
-    <div class="flex flex-col-reverse md:flex-row items-center justify-between gap-8">
-        <!-- Content Section -->
-        <div class="md:w-1/2 text-left">
-            <h1 class="text-3xl md:text-5xl font-bold mb-4 text-gray-800 dark:text-gray-100">Simplify Your Tickkk</h1>
-            <p class="text-lg mb-6 text-gray-600 dark:text-gray-300">Track, organize, and complete your tasks efficiently with our
-                user-friendly platform.</p>
+<main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-20 space-y-24">
+  <!-- Hero Section -->
+  <div class="grid grid-cols-1 lg:grid-cols-12 items-center gap-12 lg:gap-8">
+    <!-- Left Column: Content -->
+    <div class="lg:col-span-7 space-y-8 text-left max-w-2xl">
+      <!-- Feature Badge -->
+      <div class="inline-flex items-center gap-2 px-3 py-1 text-xs font-medium text-brand-700 bg-brand-50 border border-brand-200/50 dark:bg-brand-900/30 dark:text-brand-400 dark:border-brand-900/50 rounded-full">
+        <span class="w-1.5 h-1.5 rounded-full bg-brand-500 animate-pulse"></span>
+        <span>Version 2.0 is now live</span>
+      </div>
 
-            <div class="flex gap-4 mb-8">
-                <a routerLink="login"
-                    class="bg-blue-500 hover:bg-blue-600 text-white px-6 py-3 rounded-lg transition-colors font-medium">
-                    Log In
-                </a>
-                <a routerLink="register"
-                    class="border border-blue-500 text-blue-500 hover:bg-blue-50 px-6 py-3 rounded-lg transition-colors font-medium dark:hover:bg-blue-900">
-                    Sign Up
-                </a>
-            </div>
+      <div class="space-y-4">
+        <h1 class="text-4xl sm:text-5xl md:text-6xl font-bold tracking-tight text-gray-950 dark:text-white leading-[1.1]">
+          Simplify your daily workspace flow
+        </h1>
+        <p class="text-base sm:text-lg text-gray-500 dark:text-gray-400 leading-relaxed max-w-lg">
+          Track milestones, structure workflows, and complete tasks efficiently with an intuitive, minimalist workspace designed for modern teams.
+        </p>
+      </div>
 
-            <!-- Features -->
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-6">
-                <div class="flex items-start gap-2">
-                    <i class="fas fa-check-circle text-green-500 mt-1"></i>
-                    <p>Easy task organization</p>
-                </div>
-                <div class="flex items-start gap-2">
-                    <i class="fas fa-bell text-yellow-500 mt-1"></i>
-                    <p>Priority management</p>
-                </div>
-                <div class="flex items-start gap-2">
-                    <i class="fas fa-users text-blue-500 mt-1"></i>
-                    <p>User assignment</p>
-                </div>
-                <div class="flex items-start gap-2">
-                    <i class="fas fa-calendar text-purple-500 mt-1"></i>
-                    <p>Deadline tracking</p>
-                </div>
-            </div>
+      <!-- Action Buttons -->
+      <div class="flex flex-wrap items-center gap-4.5">
+        <a routerLink="login" class="inline-flex items-center justify-center px-6 py-3 text-sm font-semibold text-white bg-brand-600 hover:bg-brand-700 rounded-lg shadow-sm transition-colors">
+          Get Started
+        </a>
+        <a routerLink="register" class="inline-flex items-center justify-center px-6 py-3 text-sm font-semibold text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 hover:bg-gray-50 dark:hover:bg-gray-850 rounded-lg transition-colors">
+          Create Account
+        </a>
+      </div>
+
+      <!-- Features Checkmarks Grid -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-3.5 border-t border-gray-200 dark:border-gray-800 pt-8">
+        <div class="flex items-center gap-2.5 text-sm text-gray-600 dark:text-gray-400">
+          <div class="flex-shrink-0 w-4 h-4 rounded-full bg-green-50 dark:bg-green-950/20 flex items-center justify-center border border-green-200 dark:border-green-900/30 text-green-600 dark:text-green-400">
+            <i class="fas fa-check text-[9px]"></i>
+          </div>
+          <span>Easy task organization</span>
         </div>
-
-        <!-- Image Section -->
-        <div class="md:w-1/2 mb-8 md:mb-0">
-            <img src="image.png" alt="Tickkk Illustration" class="w-full max-w-lg mx-auto rounded-lg shadow-lg"
-                onerror="this.src='https://task-management-app-manthanank.vercel.app/image.png'; this.onerror=null;">
+        <div class="flex items-center gap-2.5 text-sm text-gray-600 dark:text-gray-400">
+          <div class="flex-shrink-0 w-4 h-4 rounded-full bg-green-50 dark:bg-green-950/20 flex items-center justify-center border border-green-200 dark:border-green-900/30 text-green-600 dark:text-green-400">
+            <i class="fas fa-check text-[9px]"></i>
+          </div>
+          <span>Priority status management</span>
         </div>
+        <div class="flex items-center gap-2.5 text-sm text-gray-600 dark:text-gray-400">
+          <div class="flex-shrink-0 w-4 h-4 rounded-full bg-green-50 dark:bg-green-950/20 flex items-center justify-center border border-green-200 dark:border-green-900/30 text-green-600 dark:text-green-400">
+            <i class="fas fa-check text-[9px]"></i>
+          </div>
+          <span>Seamless workspace assignments</span>
+        </div>
+        <div class="flex items-center gap-2.5 text-sm text-gray-600 dark:text-gray-400">
+          <div class="flex-shrink-0 w-4 h-4 rounded-full bg-green-50 dark:bg-green-950/20 flex items-center justify-center border border-green-200 dark:border-green-900/30 text-green-600 dark:text-green-400">
+            <i class="fas fa-check text-[9px]"></i>
+          </div>
+          <span>Accurate deadline tracking</span>
+        </div>
+      </div>
     </div>
 
-    <!-- How It Works Section -->
-    <section class="mt-12 md:mt-24">
-        <h2 class="text-2xl md:text-3xl font-bold mb-6 text-center text-gray-900 dark:text-gray-100">How It Works</h2>
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md text-center">
-                <div class="bg-blue-100 dark:bg-blue-900 w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <i class="fas fa-plus text-blue-500 text-xl"></i>
-                </div>
-                <h3 class="text-xl font-semibold mb-2 text-gray-800 dark:text-gray-100">Create Tasks</h3>
-                <p class="text-gray-600 dark:text-gray-300">Add new tasks with titles, descriptions, deadlines, and priority levels.</p>
-            </div>
-
-            <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md text-center">
-                <div class="bg-green-100 dark:bg-green-900 w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <i class="fas fa-tasks text-green-500 text-xl"></i>
-                </div>
-                <h3 class="text-xl font-semibold mb-2 text-gray-800 dark:text-gray-100">Track Progress</h3>
-                <p class="text-gray-600 dark:text-gray-300">Monitor ongoing and completed tasks with an intuitive dashboard.</p>
-            </div>
-
-            <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md text-center">
-                <div class="bg-purple-100 dark:bg-purple-900 w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <i class="fas fa-check-double text-purple-500 text-xl"></i>
-                </div>
-                <h3 class="text-xl font-semibold mb-2 text-gray-800 dark:text-gray-100">Complete Tasks</h3>
-                <p class="text-gray-600 dark:text-gray-300">Mark tasks as complete and keep track of your accomplishments.</p>
-            </div>
+    <!-- Right Column: Interactive UI Mockup -->
+    <div class="lg:col-span-5 flex justify-center">
+      <div class="relative w-full max-w-sm aspect-[4/3] bg-gray-50 dark:bg-gray-950 border border-gray-200 dark:border-gray-800 rounded-2xl p-5 sm:p-6 flex flex-col justify-between shadow-lg">
+        <!-- Mockup Header -->
+        <div class="flex items-center justify-between border-b border-gray-200 dark:border-gray-800 pb-3">
+          <div class="flex items-center gap-1.5">
+            <span class="w-2.5 h-2.5 rounded-full bg-red-400"></span>
+            <span class="w-2.5 h-2.5 rounded-full bg-yellow-400"></span>
+            <span class="w-2.5 h-2.5 rounded-full bg-green-400"></span>
+          </div>
+          <span class="text-[9px] font-mono text-gray-400 dark:text-gray-550 uppercase tracking-wider">// active_session</span>
         </div>
-    </section>
+
+        <!-- Task Preview Cards -->
+        <div class="space-y-3.5 my-auto">
+          <!-- Card 1 -->
+          <div class="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl p-4 shadow-sm space-y-3.5">
+            <div class="flex items-start justify-between">
+              <div class="space-y-1">
+                <h3 class="text-sm font-semibold text-gray-900 dark:text-white">Refine dashboard interface</h3>
+                <span class="inline-flex items-center px-2 py-0.5 rounded-md text-[9px] font-medium bg-red-50 text-red-700 border border-red-100 dark:bg-red-950/20 dark:text-red-400 dark:border-red-900/30">High Priority</span>
+              </div>
+              <div class="h-6 w-6 rounded-full bg-brand-600 flex items-center justify-center text-[10px] font-bold text-white shadow-sm">JD</div>
+            </div>
+            
+            <div class="space-y-2 border-t border-gray-100 dark:border-gray-800 pt-3">
+              <div class="flex items-center gap-2.5 text-xs text-gray-500">
+                <i class="far fa-check-square text-green-500"></i>
+                <span class="line-through text-gray-400 dark:text-gray-550">Eradicate colored gradients</span>
+              </div>
+              <div class="flex items-center gap-2.5 text-xs text-gray-600 dark:text-gray-400">
+                <i class="far fa-square"></i>
+                <span>Align Slate theme variables</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Mockup Footer -->
+        <div class="flex items-center justify-between text-[9px] text-gray-400 dark:text-gray-550 font-mono">
+          <span>// Tickkk Workspace</span>
+          <span>v2.0.0</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- How It Works Section -->
+  <section class="space-y-12">
+    <div class="text-center max-w-xl mx-auto space-y-2">
+      <h2 class="text-2xl sm:text-3xl font-semibold text-gray-950 dark:text-white tracking-tight">Structured for performance</h2>
+      <p class="text-sm text-gray-500 dark:text-gray-400 leading-relaxed">Everything you need to keep track of organizational milestones without the clutter.</p>
+    </div>
+    
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <!-- Step 1 -->
+      <div class="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 p-6 rounded-xl shadow-sm text-center space-y-4">
+        <div class="inline-flex items-center justify-center w-10 h-10 bg-brand-50 dark:bg-brand-900/20 text-brand-600 dark:text-brand-400 border border-brand-100 dark:border-brand-900/50 rounded-lg">
+          <i class="fas fa-plus text-sm"></i>
+        </div>
+        <h3 class="text-base font-semibold text-gray-900 dark:text-white">Create Tasks</h3>
+        <p class="text-sm text-gray-500 dark:text-gray-400 leading-relaxed">Add metadata, descriptions, custom priority indices, and checklists to align goals.</p>
+      </div>
+
+      <!-- Step 2 -->
+      <div class="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 p-6 rounded-xl shadow-sm text-center space-y-4">
+        <div class="inline-flex items-center justify-center w-10 h-10 bg-green-50 dark:bg-green-950/20 text-green-600 dark:text-green-400 border border-green-100 dark:border-green-900/30 rounded-lg">
+          <i class="fas fa-tasks text-sm"></i>
+        </div>
+        <h3 class="text-base font-semibold text-gray-900 dark:text-white">Track Progress</h3>
+        <p class="text-sm text-gray-500 dark:text-gray-400 leading-relaxed">Observe real-time completion percentage metrics and distributions across directories.</p>
+      </div>
+
+      <!-- Step 3 -->
+      <div class="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 p-6 rounded-xl shadow-sm text-center space-y-4">
+        <div class="inline-flex items-center justify-center w-10 h-10 bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 border border-gray-200 dark:border-gray-700 rounded-lg">
+          <i class="fas fa-check-double text-sm"></i>
+        </div>
+        <h3 class="text-base font-semibold text-gray-900 dark:text-white">Complete Tasks</h3>
+        <p class="text-sm text-gray-500 dark:text-gray-400 leading-relaxed">Complete milestones and review team progress using the integrated AI optimizer summary.</p>
+      </div>
+    </div>
+  </section>
 </main>

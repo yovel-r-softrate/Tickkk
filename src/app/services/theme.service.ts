@@ -32,6 +32,25 @@ export class ThemeService {
   }
 
   toggleTheme() {
-    this.isDarkMode.update(current => !current);
+    const toggle = () => {
+      const next = !this.isDarkMode();
+      this.isDarkMode.set(next);
+      if (next) {
+        document.documentElement.classList.add('dark');
+        localStorage.setItem('theme', 'dark');
+      } else {
+        document.documentElement.classList.remove('dark');
+        localStorage.setItem('theme', 'light');
+      }
+    };
+
+    if (!(document as any).startViewTransition) {
+      toggle();
+      return;
+    }
+
+    (document as any).startViewTransition(() => {
+      toggle();
+    });
   }
 }

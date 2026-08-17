@@ -30,7 +30,7 @@ export class ToastComponent {
       case 'success': return 'bg-green-50 text-green-800 border-green-100';
       case 'error': return 'bg-red-50 text-red-800 border-red-100';
       case 'warning': return 'bg-yellow-50 text-yellow-800 border-yellow-100';
-      default: return 'bg-blue-50 text-blue-800 border-blue-100';
+      default: return 'bg-brand-50 text-brand-800 border-brand-100';
     }
   }
 
@@ -39,7 +39,7 @@ export class ToastComponent {
       case 'success': return 'text-green-500';
       case 'error': return 'text-red-500';
       case 'warning': return 'text-yellow-500';
-      default: return 'text-blue-500';
+      default: return 'text-brand-500';
     }
   }
 }

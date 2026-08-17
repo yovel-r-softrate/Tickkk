@@ -122,6 +122,24 @@
 
 }
 
+.dark {
+  --bg-primary: #0f172a; /* Slate 900 */
+  --bg-secondary: #1e293b; /* Slate 800 */
+  --text-primary: #f8fafc; /* Slate 50 */
+  --text-secondary: #94a3b8; /* Slate 400 */
+  --text-muted: #64748b; /* Slate 500 */
+  --border-color: #334155; /* Slate 700 */
+
+  --hc-bg: #0f172a;
+  --hc-surface: #1e293b;
+  --hc-border: #334155;
+  --hc-border-soft: #334155;
+
+  --hc-text-1: #f8fafc;
+  --hc-text-2: #94a3b8;
+  --hc-text-3: #64748b;
+}
+
 * {
   margin: 0;
   padding: 0;
@@ -1020,5 +1038,30 @@ body.mobile-device {
   padding-bottom: env(safe-area-inset-bottom);
   padding-left: env(safe-area-inset-left);
   padding-right: env(safe-area-inset-right);
+}
+
+/* View Transition API - Circular Theme Toggle Animation */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation: none;
+  mix-blend-mode: normal;
+}
+
+::view-transition-old(root) {
+  z-index: 1;
+}
+
+::view-transition-new(root) {
+  z-index: 9999;
+  animation: circular-reveal 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+@keyframes circular-reveal {
+  from {
+    clip-path: circle(0% at 50% 50%);
+  }
+  to {
+    clip-path: circle(120% at 50% 50%);
+  }
 }
 
