@@ -1,16 +1,18 @@
 import { Component, inject, OnInit, signal } from '@angular/core';
 import { TaskService } from '../../services/task.service';
 import { AiService } from '../../services/ai.service';
-import { NgClass, DecimalPipe } from '@angular/common';
+import { NgClass, DecimalPipe, DatePipe } from '@angular/common';
 import { RouterLink } from '@angular/router';
+import { Task } from '../../core/models/tasks.model';
 
 @Component({
   selector: 'app-dashboard',
-  imports: [NgClass, DecimalPipe, RouterLink],
+  imports: [NgClass, DecimalPipe, DatePipe, RouterLink],
   templateUrl: './dashboard.component.html',
 })
 export class DashboardComponent implements OnInit {
   stats = signal<any>(null);
+  recentTasks = signal<Task[]>([]);
   loading = signal<boolean>(true);
   error = signal<string | null>(null);
   aiSummary = signal<string | null>(null);
@@ -25,16 +27,30 @@ export class DashboardComponent implements OnInit {
 
   loadStats() {
     this.loading.set(true);
+    
+    // Fetch stats
     this.taskService.getTaskStats().subscribe({
       next: (response) => {
         if (response.status === 'success') {
           this.stats.set(response.data);
         }
-        this.loading.set(false);
       },
       error: (err) => {
         console.error('Error loading stats:', err);
         this.error.set('Failed to load dashboard statistics');
+      }
+    });
+
+    // Fetch top 5 pending tasks
+    this.taskService.getPendingTasks(1, 5).subscribe({
+      next: (response) => {
+        if (response.status === 'success') {
+          this.recentTasks.set(response.data.tasks);
+        }
+        this.loading.set(false);
+      },
+      error: (err) => {
+        console.error('Error loading pending tasks:', err);
         this.loading.set(false);
       }
     });
