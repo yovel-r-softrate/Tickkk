@@ -1,113 +1,114 @@
-<div class="container mx-auto px-4 py-8 max-w-7xl">
-    <div class="flex justify-between items-center mb-8">
-        <h2 class="text-3xl font-bold text-gray-800 dark:text-gray-100">My Organizations</h2>
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+  <!-- Page Header -->
+  <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center border-b border-gray-200 dark:border-gray-800 pb-5 gap-4">
+    <div>
+      <h1 class="text-2xl font-semibold text-gray-900 dark:text-gray-100 tracking-tight">Organizations</h1>
+      <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Manage team structures and shared workspaces.</p>
     </div>
+    <div>
+      <a routerLink="/organizations/new" class="inline-flex items-center justify-center px-4 py-2 text-sm font-semibold text-white bg-brand-600 hover:bg-brand-700 rounded-lg shadow-sm transition-colors">
+        <i class="fas fa-plus mr-1.5 text-xs"></i> New Organization
+      </a>
+    </div>
+  </div>
 
-    <!-- Loading State -->
-    @if(loading()) {
-        <div class="flex items-center justify-center p-12">
-            <div class="flex flex-col items-center">
-                <div class="w-16 h-16 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
-                <p class="mt-4 text-gray-600 dark:text-gray-300">Loading organizations...</p>
-            </div>
+  <!-- Loading State -->
+  @if(loading()) {
+    <div class="flex flex-col items-center justify-center p-12 space-y-3">
+      <div class="w-10 h-10 border-2 border-brand-500 border-t-transparent rounded-full animate-spin"></div>
+      <p class="text-sm text-gray-500 dark:text-gray-400">Loading organizations...</p>
+    </div>
+  }
+  
+  <!-- Error State -->
+  @else if(error()) {
+    <div class="rounded-xl border border-red-200 bg-red-50/50 p-4 text-red-800 dark:border-red-900/30 dark:bg-red-950/20 dark:text-red-400">
+      <div class="flex items-center gap-2.5">
+        <i class="fas fa-exclamation-circle text-lg"></i>
+        <h3 class="font-semibold text-sm">Organizations unavailable</h3>
+      </div>
+      <p class="text-xs mt-1.5 opacity-90">{{ error() }}</p>
+      <button class="text-xs font-semibold underline mt-2 hover:no-underline" (click)="loadOrganizations(1, itemsPerPage())">Try again</button>
+    </div>
+  }
+  
+  <!-- Content -->
+  @else {
+    <!-- Empty State -->
+    @if(organizations().length === 0) {
+      <div class="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl p-12 shadow-sm text-center max-w-lg mx-auto">
+        <div class="inline-flex items-center justify-center w-12 h-12 bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl text-gray-500 mb-4">
+          <i class="fas fa-building text-lg"></i>
         </div>
+        <h3 class="text-base font-semibold text-gray-900 dark:text-gray-100">No organizations found</h3>
+        <p class="text-sm text-gray-500 dark:text-gray-400 mt-1 max-w-sm mx-auto">Create your first organization workspace to start managing shared tasks and projects.</p>
+        <a routerLink="/organizations/new" class="mt-5 inline-flex items-center justify-center px-4 py-2 text-sm font-semibold text-white bg-brand-600 hover:bg-brand-700 rounded-lg shadow-sm transition-colors">
+          <i class="fas fa-plus mr-1.5 text-xs"></i> Create Organization
+        </a>
+      </div>
     }
     
-    <!-- Error State -->
-    @else if(error()) {
-        <div class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 rounded mb-6" role="alert">
-            <div class="flex">
-                <div class="flex-shrink-0">
-                    <i class="fas fa-exclamation-circle mt-1"></i>
-                </div>
-                <div class="ml-3">
-                    <p class="font-medium">Something went wrong</p>
-                    <p class="text-sm">{{ error() }}</p>
-                    <button class="text-sm underline mt-2" (click)="loadOrganizations(1, itemsPerPage())">Try again</button>
-                </div>
-            </div>
-        </div>
-    }
-    
-    <!-- Organizations Content -->
     @else {
-        <!-- Empty State -->
-        @if(organizations().length === 0) {
-            <div class="bg-white rounded-xl shadow-md p-12 dark:bg-gray-800">
-                <div class="flex flex-col items-center justify-center text-center">
-                    <div class="bg-blue-100 p-4 rounded-full dark:bg-blue-900">
-                        <i class="fas fa-building text-blue-500 text-2xl"></i>
-                    </div>
-                    <h3 class="mt-4 text-lg font-medium text-gray-900 dark:text-gray-100">No organizations found</h3>
-                    <p class="mt-1 text-gray-500 dark:text-gray-400">Create your first organization to get started.</p>
-                    <a routerLink="/organizations/new" class="mt-4 inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700">
-                        <i class="fas fa-plus mr-2"></i> Create Organization
-                    </a>
+      <!-- Organizations Grid -->
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        @for (org of organizations(); track org._id) {
+          <div class="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl p-5 hover:border-brand-500 dark:hover:border-brand-400 hover:shadow-md transition-all duration-200 flex flex-col h-full relative group">
+            <div class="flex items-start justify-between mb-4">
+              @if (org.logo) {
+                <div class="h-10 w-10 bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg flex items-center justify-center overflow-hidden">
+                  <img src="{{ org.logo }}" alt="{{ org.name }} logo" class="object-cover h-full w-full">
                 </div>
-            </div>
-        }
-        
-        @else {
-            <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-                @for (org of organizations(); track org._id) {
-                    <div class="bg-white rounded-lg shadow-md overflow-hidden flex flex-col h-full hover:shadow-lg transition-shadow dark:bg-gray-800">
-                        <div class="p-6 pb-4">
-                            <div class="flex items-center justify-between mb-2">
-                                @if (org.logo) {
-                                    <div class="h-12 w-12 bg-blue-100 rounded-lg flex items-center justify-center overflow-hidden dark:bg-blue-900">
-                                        <img src="{{ org.logo }}" alt="{{ org.name }} logo" class="object-cover">
-                                    </div>
-                                } @else {
-                                    <div class="h-12 w-12 bg-blue-100 rounded-lg flex items-center justify-center dark:bg-blue-900">
-                                        <i class="fas fa-building text-blue-500 text-xl"></i>
-                                    </div>
-                                }
-                                <div class="text-xs bg-gray-100 px-2 py-1 rounded-full dark:bg-gray-800">
-                                    {{ org.members.length }} members
-                                </div>
-                            </div>
-                            
-                            <h3 class="text-xl font-semibold text-gray-800 mt-2 mb-1 dark:text-gray-100">{{ org.name }}</h3>
-                            <p class="text-gray-600 text-sm mb-4 line-clamp-2 dark:text-gray-300">
-                                {{ org.description || 'No description provided' }}
-                            </p>
-                            
-                            <div class="text-xs text-gray-500 mb-4 dark:text-gray-400">
-                                Created by {{ org.owner.email }}
-                            </div>
-                        </div>
-                        
-                        <div class="mt-auto p-4 pt-2 border-t border-gray-100 dark:border-gray-700">
-                            <a [routerLink]="['/organizations', org._id]" class="w-full inline-flex justify-center items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700">
-                                <i class="fas fa-eye mr-2"></i> View Details
-                            </a>
-                        </div>
-                    </div>
-                }
+              } @else {
+                <div class="h-10 w-10 bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg flex items-center justify-center text-gray-400 dark:text-gray-500">
+                  <i class="fas fa-building text-base"></i>
+                </div>
+              }
+              <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-300">
+                {{ org.members.length }} members
+              </span>
             </div>
             
-            <!-- Pagination -->
-            @if(totalPages() > 1) {
-                <div class="mt-8 flex justify-center">
-                    <div class="bg-white px-4 py-3 flex items-center justify-between border-t border-gray-200 sm:px-6 rounded-lg shadow-md dark:bg-gray-800 dark:border-gray-700">
-                        <div class="flex-1 flex justify-between items-center">
-                            <button (click)="previousPage()" 
-                                    [disabled]="currentPage() === 1"
-                                    class="flex items-center text-sm text-blue-600 hover:text-blue-800 disabled:text-gray-400 disabled:cursor-not-allowed transition-colors dark:text-blue-500 dark:hover:text-blue-400">
-                                <i class="fas fa-arrow-left mr-1"></i> Previous
-                            </button>
-                            <span class="text-sm text-gray-600 dark:text-gray-300">
-                                Showing {{ (currentPage() - 1) * itemsPerPage() + 1 }}-{{ Math.min(currentPage() * itemsPerPage(), totalOrganizations()) }} of {{ totalOrganizations() }} organizations
-                            </span>
-                            <button (click)="nextPage()" 
-                                    [disabled]="currentPage() === totalPages()"
-                                    class="flex items-center text-sm text-blue-600 hover:text-blue-800 disabled:text-gray-400 disabled:cursor-not-allowed transition-colors dark:text-blue-500 dark:hover:text-blue-400">
-                                Next <i class="fas fa-arrow-right ml-1"></i>
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            }
+            <div class="flex-grow space-y-1">
+              <h3 class="text-base font-semibold text-gray-900 dark:text-gray-100">
+                <a [routerLink]="['/organizations', org._id]" class="hover:text-brand-600 dark:hover:text-brand-400 hover:underline">
+                  {{ org.name }}
+                </a>
+              </h3>
+              <p class="text-sm text-gray-500 dark:text-gray-400 line-clamp-2 leading-relaxed">
+                {{ org.description || 'No description provided.' }}
+              </p>
+            </div>
+            
+            <div class="border-t border-gray-100 dark:border-gray-800 pt-4 mt-5 flex items-center justify-between text-xs text-gray-400 dark:text-gray-500">
+              <span class="truncate">Owner: <span class="font-medium text-gray-650 dark:text-gray-300">{{ org.owner.email }}</span></span>
+              <a [routerLink]="['/organizations', org._id]" class="text-brand-650 dark:text-brand-400 font-semibold hover:underline flex items-center gap-1 shrink-0 ml-2">
+                Manage <i class="fas fa-arrow-right text-[10px]"></i>
+              </a>
+            </div>
+          </div>
         }
+      </div>
+      
+      <!-- Pagination -->
+      @if(totalPages() > 1) {
+        <div class="mt-8 flex justify-center border-t border-gray-200 dark:border-gray-800 pt-6">
+          <nav class="flex items-center gap-6 text-sm">
+            <button (click)="previousPage()" 
+                    [disabled]="currentPage() === 1"
+                    class="inline-flex items-center gap-1.5 text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
+              <i class="fas fa-arrow-left text-xs"></i> Previous
+            </button>
+            <span class="text-gray-550 dark:text-gray-400 font-medium">
+              Showing {{ (currentPage() - 1) * itemsPerPage() + 1 }}-{{ Math.min(currentPage() * itemsPerPage(), totalOrganizations()) }} of {{ totalOrganizations() }}
+            </span>
+            <button (click)="nextPage()" 
+                    [disabled]="currentPage() === totalPages()"
+                    class="inline-flex items-center gap-1.5 text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
+              Next <i class="fas fa-arrow-right text-xs"></i>
+            </button>
+          </nav>
+        </div>
+      }
     }
+  }
 </div>

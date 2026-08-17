@@ -1,249 +1,259 @@
-<div class="container mx-auto px-4 py-8 max-w-5xl">
-    <div class="mb-6">
-        <a routerLink="/organizations" class="text-blue-600 hover:text-blue-800 inline-flex items-center dark:text-blue-500 dark:hover:text-blue-400">
-            <i class="fas fa-arrow-left mr-2"></i> Back to Organizations
-        </a>
+<div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+  <!-- Back Button -->
+  <div class="mb-2">
+    <a routerLink="/organizations" class="inline-flex items-center text-sm text-gray-500 hover:text-brand-600 dark:text-gray-400 dark:hover:text-brand-400 transition-colors font-medium">
+      <i class="fas fa-arrow-left mr-2 text-xs"></i> Back to Organizations
+    </a>
+  </div>
+
+  <!-- Loading State -->
+  @if(loading()) {
+    <div class="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl p-12 flex flex-col items-center justify-center space-y-3 shadow-sm">
+      <div class="w-10 h-10 border-2 border-brand-500 border-t-transparent rounded-full animate-spin"></div>
+      <p class="text-sm text-gray-550 dark:text-gray-400">Loading organization details...</p>
     </div>
+  }
 
-    <!-- Loading State -->
-    @if(loading()) {
-        <div class="bg-white rounded-xl shadow-md p-12 flex justify-center dark:bg-gray-800">
-            <div class="flex flex-col items-center">
-                <div class="w-16 h-16 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
-                <p class="mt-4 text-gray-600 dark:text-gray-300">Loading organization details...</p>
-            </div>
-        </div>
-    }
+  <!-- Error State -->
+  @else if(error()) {
+    <div class="rounded-xl border border-red-200 bg-red-50/50 p-4 text-red-800 dark:border-red-900/30 dark:bg-red-950/20 dark:text-red-400">
+      <div class="flex items-center gap-2.5">
+        <i class="fas fa-exclamation-circle text-lg"></i>
+        <h3 class="font-semibold text-sm">Error Loading Details</h3>
+      </div>
+      <p class="text-xs mt-1.5 opacity-90">{{ error() }}</p>
+      <button (click)="loadOrganizationDetails(organization()?._id || '')" class="text-xs font-semibold underline mt-2 hover:no-underline text-brand-600 dark:text-brand-400">
+        Try again
+      </button>
+    </div>
+  }
 
-    <!-- Error State -->
-    @else if(error()) {
-        <div class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 rounded-lg" role="alert">
-            <div class="flex">
-                <div class="flex-shrink-0">
-                    <i class="fas fa-exclamation-triangle"></i>
-                </div>
-                <div class="ml-3">
-                    <p class="font-medium">Error</p>
-                    <p>{{ error() }}</p>
-                    <button (click)="loadOrganizationDetails(organization()?._id || '')" class="text-blue-600 hover:underline mt-2 dark:text-blue-500">
-                        Try again
-                    </button>
-                </div>
+  <!-- Organization Details -->
+  @else if(organization()) {
+    <div class="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl shadow-sm overflow-hidden">
+      <!-- Header Banner Section -->
+      <div class="relative">
+        <div class="h-28 bg-gradient-to-r from-brand-700 to-gray-900 dark:from-brand-900/50 dark:to-gray-950"></div>
+        
+        <!-- Organization Logo/Icon Container -->
+        <div class="absolute bottom-0 left-6 sm:left-8 transform translate-y-1/2">
+          @if(organization()?.logo) {
+            <div class="h-20 w-20 sm:h-24 sm:w-24 rounded-xl overflow-hidden border-4 border-white dark:border-gray-900 bg-white shadow-md">
+              <img [src]="organization()?.logo" [alt]="organization()?.name + ' logo'" class="w-full h-full object-cover">
             </div>
-        </div>
-    }
-
-    <!-- Organization Details -->
-    @else if(organization()) {
-        <div class="bg-white rounded-xl shadow-md overflow-hidden dark:bg-gray-800">
-            <!-- Header Section -->
-            <div class="relative">
-                <!-- Background Bar -->
-                <div class="h-32 bg-gradient-to-r from-blue-500 to-blue-700"></div>
-                
-                <!-- Organization Logo/Icon -->
-                <div class="absolute bottom-0 left-8 transform translate-y-1/2">
-                    @if(organization()?.logo) {
-                        <div class="h-24 w-24 rounded-xl overflow-hidden border-4 border-white bg-white shadow-lg dark:bg-gray-800">
-                            <img [src]="organization()?.logo" [alt]="organization()?.name + ' logo'" class="w-full h-full object-cover">
-                        </div>
-                    } @else {
-                        <div class="h-24 w-24 rounded-xl bg-blue-100 border-4 border-white flex items-center justify-center shadow-lg dark:bg-blue-900">
-                            <i class="fas fa-building text-blue-500 text-4xl"></i>
-                        </div>
-                    }
-                </div>
-                
-                <!-- Action Buttons -->
-                <div class="absolute bottom-4 right-8">
-                    @if(isAdmin()) {
-                        <button 
-                            (click)="toggleEditMode()"
-                            class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 mr-3"
-                        >
-                            <i class="fas" [ngClass]="editMode() ? 'fa-times' : 'fa-edit'"></i>
-                            <span class="ml-2">{{ editMode() ? 'Cancel Edit' : 'Edit' }}</span>
-                        </button>
-                    }
-                </div>
+          } @else {
+            <div class="h-20 w-20 sm:h-24 sm:w-24 rounded-xl bg-gray-150 dark:bg-gray-800 border-4 border-white dark:border-gray-900 flex items-center justify-center shadow-md text-gray-500 dark:text-gray-400">
+              <i class="fas fa-building text-3xl"></i>
             </div>
-            
-            <!-- Content Section -->
-            <div class="mt-16 p-8">
-                @if(!editMode()) {
-                    <h1 class="text-3xl font-bold text-gray-900 dark:text-gray-100">{{ organization()?.name }}</h1>
-                    <p class="mt-4 text-gray-600 dark:text-gray-300">{{ organization()?.description || 'No description provided.' }}</p>
-                    
-                    <div class="mt-8 flex items-center text-gray-500 text-sm dark:text-gray-400">
-                        <i class="fas fa-user-circle mr-2"></i>
-                        <span>Created by {{ organization()?.owner?.email }}</span>
-                        <span class="mx-2">•</span>
-                        <i class="far fa-calendar-alt mr-2"></i>
-                        <span>{{ organization()?.createdAt | date:'mediumDate' }}</span>
-                    </div>
-                } @else {
-                    <form [formGroup]="organizationForm">
-                        <div class="space-y-6">
-                            <div>
-                                <label for="name" class="block text-sm font-medium text-gray-700 mb-1 dark:text-gray-300">
-                                    Organization Name <span class="text-red-500">*</span>
-                                </label>
-                                <input 
-                                    type="text" 
-                                    id="name" 
-                                    formControlName="name"
-                                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100 dark:focus:ring-blue-400"
-                                >
-                            </div>
-                            
-                            <div>
-                                <label for="description" class="block text-sm font-medium text-gray-700 mb-1 dark:text-gray-300">Description</label>
-                                <textarea 
-                                    id="description" 
-                                    formControlName="description"
-                                    rows="3"
-                                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100 dark:focus:ring-blue-400"
-                                ></textarea>
-                            </div>
-                            
-                            <div>
-                                <button 
-                                    type="button"
-                                    (click)="saveChanges()"
-                                    [disabled]="organizationForm.invalid"
-                                    class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md disabled:opacity-50 disabled:cursor-not-allowed"
-                                >
-                                    <i class="fas fa-save mr-2"></i> Save Changes
-                                </button>
-                            </div>
-                        </div>
-                    </form>
-                }
-                
-                <!-- Members Section -->
-                <div class="mt-12">
-                    <div class="flex justify-between items-center mb-4">
-                        <h2 class="text-xl font-semibold text-gray-800 dark:text-gray-100">Members ({{ organization()?.members?.length }})</h2>
-                    </div>
-                    
-                    <div class="bg-gray-50 rounded-lg overflow-hidden border border-gray-200 dark:bg-black dark:border-gray-700">
-                        <div class="overflow-x-auto">
-                            <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-                                <thead class="bg-gray-50 dark:bg-black">
-                                    <tr>
-                                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider dark:text-gray-400">User</th>
-                                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider dark:text-gray-400">Role</th>
-                                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider dark:text-gray-400">Joined</th>
-                                    </tr>
-                                </thead>
-                                <tbody class="bg-white divide-y divide-gray-200 dark:bg-gray-800 dark:divide-gray-700">
-                                    @for (member of organization()?.members; track member._id) {
-                                        <tr>
-                                            <td class="px-6 py-4 whitespace-nowrap">
-                                                <div class="flex items-center">
-                                                    <div class="flex-shrink-0 h-10 w-10">
-                                                        <div class="h-10 w-10 rounded-full bg-gray-200 flex items-center justify-center dark:bg-gray-700">
-                                                            <i class="fas fa-user text-gray-500 dark:text-gray-400"></i>
-                                                        </div>
-                                                    </div>
-                                                    <div class="ml-4">
-                                                        <div class="text-sm font-medium text-gray-900 dark:text-gray-100">
-                                                            {{ member.user.email }}
-                                                        </div>
-                                                        @if(organization()?.owner?._id === member.user._id) {
-                                                            <div class="text-xs text-gray-500 dark:text-gray-400">Owner</div>
-                                                        }
-                                                    </div>
-                                                </div>
-                                            </td>
-                                            <td class="px-6 py-4 whitespace-nowrap">
-                                                <span class="px-2 py-1 text-xs font-semibold rounded-full" 
-                                                    [ngClass]="{
-                                                        'bg-purple-100 text-purple-800': member.role === 'admin',
-                                                        'bg-blue-100 text-blue-800': member.role === 'member'
-                                                    }">
-                                                    {{ member.role }}
-                                                </span>
-                                            </td>
-                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
-                                                {{ member.joinedAt | date:'mediumDate' }}
-                                            </td>
-                                        </tr>
-                                    }
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-            </div>
+          }
         </div>
         
-        <!-- Add Member Modal -->
-        @if(showAddMemberModal()) {
-            <div class="fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center z-50">
-                <div class="bg-white rounded-lg max-w-md w-full mx-4 shadow-xl dark:bg-gray-800">
-                    <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
-                        <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100">Add Member</h3>
-                    </div>
-                    
-                    <form [formGroup]="addMemberForm" (ngSubmit)="addMember()">
-                        <div class="px-6 py-4">
-                            @if(loadingUsers()) {
-                                <div class="flex justify-center py-4">
-                                    <div class="w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
-                                </div>
-                            } @else if(availableUsers().length === 0) {
-                                <div class="text-center py-4 text-gray-500 dark:text-gray-400">
-                                    No available users to add
-                                </div>
-                            } @else {
-                                <div class="mb-4">
-                                    <label for="userId" class="block text-sm font-medium text-gray-700 mb-1 dark:text-gray-300">Select User</label>
-                                    <select 
-                                        id="userId" 
-                                        formControlName="userId"
-                                        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100 dark:focus:ring-blue-400"
-                                    >
-                                        <option value="" disabled selected>-- Select a User --</option>
-                                        @for (user of availableUsers(); track user._id) {
-                                            <option [value]="user._id">{{ user.email }}</option>
-                                        }
-                                    </select>
-                                </div>
-                                
-                                <div class="mb-4">
-                                    <label for="role" class="block text-sm font-medium text-gray-700 mb-1 dark:text-gray-300">Role</label>
-                                    <select 
-                                        id="role" 
-                                        formControlName="role"
-                                        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100 dark:focus:ring-blue-400"
-                                    >
-                                        <option value="member">Member</option>
-                                        <option value="admin">Admin</option>
-                                    </select>
-                                </div>
-                            }
-                        </div>
-                        
-                        <div class="px-6 py-4 bg-gray-50 flex justify-end space-x-3 rounded-b-lg dark:bg-black">
-                            <button 
-                                type="button"
-                                (click)="closeAddMemberModal()"
-                                class="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:border-gray-600 dark:hover:bg-gray-800"
-                            >
-                                Cancel
-                            </button>
-                            <button 
-                                type="submit"
-                                [disabled]="addMemberForm.invalid || loadingUsers() || availableUsers().length === 0"
-                                class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md disabled:opacity-50 disabled:cursor-not-allowed"
-                            >
-                                <i class="fas fa-user-plus mr-1"></i> Add Member
-                            </button>
-                        </div>
-                    </form>
-                </div>
+        <!-- Action Buttons inside Banner -->
+        <div class="absolute bottom-4 right-6 sm:right-8">
+          @if(isAdmin()) {
+            <button 
+              (click)="toggleEditMode()"
+              class="inline-flex items-center justify-center px-4.5 py-2 text-xs font-semibold text-gray-800 dark:text-gray-250 bg-white/90 dark:bg-gray-900/90 hover:bg-white dark:hover:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg shadow-sm backdrop-blur-sm transition-all hover:-translate-y-0.5"
+            >
+              <i class="fas mr-1.5" [ngClass]="editMode() ? 'fa-times' : 'fa-edit'"></i>
+              <span>{{ editMode() ? 'Cancel' : 'Edit Space' }}</span>
+            </button>
+          }
+        </div>
+      </div>
+      
+      <!-- Details / Description Area -->
+      <div class="mt-12 sm:mt-16 p-6 sm:p-8 space-y-6">
+        @if(!editMode()) {
+          <div class="space-y-3">
+            <h1 class="text-2xl sm:text-3xl font-semibold text-gray-955 dark:text-white tracking-tight">{{ organization()?.name }}</h1>
+            <p class="text-sm sm:text-base text-gray-500 dark:text-gray-400 leading-relaxed max-w-3xl">
+              {{ organization()?.description || 'No description provided for this organization.' }}
+            </p>
+          </div>
+          
+          <div class="flex flex-wrap items-center gap-x-4 gap-y-2 text-xs text-gray-450 dark:text-gray-500">
+            <span class="flex items-center gap-1.5">
+              <i class="far fa-user text-xs"></i>
+              Owner: <span class="font-medium text-gray-650 dark:text-gray-300">{{ organization()?.owner?.email }}</span>
+            </span>
+            <span class="hidden sm:inline text-gray-300 dark:text-gray-700">•</span>
+            <span class="flex items-center gap-1.5">
+              <i class="far fa-calendar-alt text-xs"></i>
+              Created on {{ organization()?.createdAt | date:'mediumDate' }}
+            </span>
+          </div>
+        } @else {
+          <!-- Edit Form -->
+          <form [formGroup]="organizationForm" class="space-y-5 max-w-xl">
+            <div class="space-y-1">
+              <label for="name" class="block text-xs font-semibold text-gray-550 dark:text-gray-400 uppercase tracking-wider">
+                Organization Name <span class="text-red-500">*</span>
+              </label>
+              <input 
+                type="text" 
+                id="name" 
+                formControlName="name"
+                class="w-full px-3.5 py-2 text-sm border border-gray-300 dark:border-gray-700 rounded-lg bg-transparent focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 dark:text-white"
+              >
             </div>
+            
+            <div class="space-y-1">
+              <label for="description" class="block text-xs font-semibold text-gray-550 dark:text-gray-400 uppercase tracking-wider">Description</label>
+              <textarea 
+                id="description" 
+                formControlName="description"
+                rows="3"
+                class="w-full px-3.5 py-2 text-sm border border-gray-300 dark:border-gray-700 rounded-lg bg-transparent focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 dark:text-white"
+                placeholder="Describe your organization's scope..."
+              ></textarea>
+            </div>
+            
+            <div>
+              <button 
+                type="button"
+                (click)="saveChanges()"
+                [disabled]="organizationForm.invalid"
+                class="inline-flex items-center justify-center px-4.5 py-2 text-xs font-semibold text-white bg-brand-600 hover:bg-brand-700 rounded-lg shadow-sm transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                <i class="fas fa-save mr-1.5"></i> Save Changes
+              </button>
+            </div>
+          </form>
         }
+        
+        <!-- Members List Section -->
+        <div class="border-t border-gray-200 dark:border-gray-800 pt-8 space-y-4">
+          <div class="flex justify-between items-center">
+            <h2 class="text-base font-semibold text-gray-955 dark:text-white uppercase tracking-wider font-sans">Members ({{ organization()?.members?.length || 0 }})</h2>
+            @if(isAdmin()) {
+              <button (click)="openAddMemberModal()" class="inline-flex items-center justify-center px-3 py-1.5 text-xs font-semibold text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 hover:bg-gray-50 dark:hover:bg-gray-850 rounded-lg transition-colors shadow-sm">
+                <i class="fas fa-user-plus mr-1 text-[10px]"></i> Add Member
+              </button>
+            }
+          </div>
+          
+          <div class="border border-gray-200 dark:border-gray-800 rounded-xl overflow-hidden shadow-sm bg-white dark:bg-gray-900">
+            <div class="overflow-x-auto">
+              <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-800 text-sm">
+                <thead class="bg-gray-50 dark:bg-gray-900/50">
+                  <tr>
+                    <th scope="col" class="px-6 py-3.5 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">User</th>
+                    <th scope="col" class="px-6 py-3.5 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Role</th>
+                    <th scope="col" class="px-6 py-3.5 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Joined Date</th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-200 dark:divide-gray-800">
+                  @for (member of organization()?.members; track member._id) {
+                    <tr class="hover:bg-gray-50/50 dark:hover:bg-gray-850/30 transition-colors">
+                      <td class="px-6 py-4 whitespace-nowrap">
+                        <div class="flex items-center gap-3">
+                          <div class="h-8 w-8 rounded-full bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-750 flex items-center justify-center text-gray-500 dark:text-gray-400">
+                            <i class="far fa-user text-xs"></i>
+                          </div>
+                          <div>
+                            <div class="font-medium text-gray-900 dark:text-white">
+                              {{ member.user.email }}
+                            </div>
+                            @if(organization()?.owner?._id === member.user._id) {
+                              <div class="text-[10px] text-gray-400 dark:text-gray-500 font-medium">Organization Creator</div>
+                            }
+                          </div>
+                        </div>
+                      </td>
+                      <td class="px-6 py-4 whitespace-nowrap">
+                        <span [ngClass]="{
+                          'bg-brand-50 text-brand-700 border-brand-200/50 dark:bg-brand-950/20 dark:text-brand-400 dark:border-brand-900/30': member.role === 'admin',
+                          'bg-gray-100 text-gray-700 border-gray-200/60 dark:bg-gray-800 dark:text-gray-350 dark:border-gray-700': member.role === 'member'
+                        }" class="inline-flex items-center px-2 py-0.5 text-xs font-medium rounded-md border">
+                          {{ member.role }}
+                        </span>
+                      </td>
+                      <td class="px-6 py-4 whitespace-nowrap text-gray-500 dark:text-gray-405 text-xs">
+                        {{ member.joinedAt | date:'mediumDate' }}
+                      </td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Add Member Modal -->
+    @if(showAddMemberModal()) {
+      <div class="fixed inset-0 bg-gray-900/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+        <div class="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl max-w-md w-full shadow-xl overflow-hidden animate-fade-in">
+          <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-800 flex items-center justify-between">
+            <h3 class="text-sm font-semibold text-gray-950 dark:text-white uppercase tracking-wider">Add Team Member</h3>
+            <button (click)="closeAddMemberModal()" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors">
+              <i class="fas fa-times text-sm"></i>
+            </button>
+          </div>
+          
+          <form [formGroup]="addMemberForm" (ngSubmit)="addMember()" class="space-y-4">
+            <div class="px-6 py-5 space-y-4">
+              @if(loadingUsers()) {
+                <div class="flex flex-col items-center py-6 space-y-2">
+                  <div class="w-6 h-6 border-2 border-brand-500 border-t-transparent rounded-full animate-spin"></div>
+                  <p class="text-xs text-gray-500 dark:text-gray-400">Loading directory...</p>
+                </div>
+              } @else if(availableUsers().length === 0) {
+                <div class="text-center py-6 text-sm text-gray-400 dark:text-gray-500 space-y-1">
+                  <i class="fas fa-users-slash text-2xl mb-1.5"></i>
+                  <p>No available users to add</p>
+                  <p class="text-xs opacity-80">All platform members are already in this organization.</p>
+                </div>
+              } @else {
+                <div class="space-y-1">
+                  <label for="userId" class="block text-xs font-semibold text-gray-550 dark:text-gray-400 uppercase tracking-wider">Select User</label>
+                  <select 
+                    id="userId" 
+                    formControlName="userId"
+                    class="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 dark:text-white"
+                  >
+                    <option value="" disabled selected>-- Select a User --</option>
+                    @for (user of availableUsers(); track user._id) {
+                      <option [value]="user._id">{{ user.email }}</option>
+                    }
+                  </select>
+                </div>
+                
+                <div class="space-y-1">
+                  <label for="role" class="block text-xs font-semibold text-gray-555 dark:text-gray-400 uppercase tracking-wider">Role</label>
+                  <select 
+                    id="role" 
+                    formControlName="role"
+                    class="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 dark:text-white"
+                  >
+                    <option value="member">Member</option>
+                    <option value="admin">Admin</option>
+                  </select>
+                </div>
+              }
+            </div>
+            
+            <div class="px-6 py-4 bg-gray-50 dark:bg-gray-900/50 border-t border-gray-200 dark:border-gray-800 flex justify-end gap-2.5">
+              <button 
+                type="button"
+                (click)="closeAddMemberModal()"
+                class="px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg text-xs font-semibold text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-900 hover:bg-gray-50 dark:hover:bg-gray-850 transition-colors"
+              >
+                Cancel
+              </button>
+              <button 
+                type="submit"
+                [disabled]="addMemberForm.invalid || loadingUsers() || availableUsers().length === 0"
+                class="inline-flex items-center px-4 py-2 text-xs font-semibold text-white bg-brand-600 hover:bg-brand-700 rounded-lg shadow-sm transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                <i class="fas fa-user-plus mr-1.5 text-[10px]"></i> Add Member
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
     }
+  }
 </div>
