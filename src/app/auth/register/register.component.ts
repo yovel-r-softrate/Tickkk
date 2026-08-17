@@ -22,6 +22,7 @@ export class RegisterComponent implements OnInit {
   error = signal<string>('');
   showPassword = signal<boolean>(false);
   isAdmin = signal<boolean>(false);
+  isLoading = signal<boolean>(false);
   organizations: Organization[] = [];
 
   authService = inject(AuthService);
@@ -78,6 +79,9 @@ export class RegisterComponent implements OnInit {
       return;
     }
 
+    this.isLoading.set(true);
+    this.error.set('');
+
     const data = {
       email: this.registerForm.value.email,
       password: this.registerForm.value.password,
@@ -88,10 +92,12 @@ export class RegisterComponent implements OnInit {
 
     this.authService.register(data).subscribe({
       next: () => {
+        this.isLoading.set(false);
         this.router.navigate(['/tasks']);
       },
       error: (err) => {
         console.error(err);
+        this.isLoading.set(false);
         this.error.set(err?.error?.message || 'An error occurred');
       },
     });
