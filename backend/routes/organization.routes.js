@@ -4,6 +4,7 @@ const organizationController = require('../controllers/organization.controller')
 const userController = require('../controllers/user.controller'); // Add this import
 const { auth, isAdmin } = require('../middleware/auth.middleware');
 
+
 /**
  * @swagger
  * /api/organizations:
