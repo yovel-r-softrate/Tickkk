@@ -1,16 +1,18 @@
-import { Component, inject, OnInit, signal } from '@angular/core';
+import { Component, inject, OnInit, OnDestroy, signal } from '@angular/core';
 import { TaskService } from '../../services/task.service';
 import { AiService } from '../../services/ai.service';
 import { NgClass, DecimalPipe, DatePipe } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { Task } from '../../core/models/tasks.model';
+import { WebsocketService } from '../../services/websocket.service';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-dashboard',
   imports: [NgClass, DecimalPipe, DatePipe, RouterLink],
   templateUrl: './dashboard.component.html',
 })
-export class DashboardComponent implements OnInit {
+export class DashboardComponent implements OnInit, OnDestroy {
   stats = signal<any>(null);
   recentTasks = signal<Task[]>([]);
   loading = signal<boolean>(true);
@@ -20,9 +22,25 @@ export class DashboardComponent implements OnInit {
 
   taskService = inject(TaskService);
   aiService = inject(AiService);
+  wsService = inject(WebsocketService);
+  private subscriptions = new Subscription();
 
   ngOnInit() {
     this.loadStats();
+    
+    this.subscriptions.add(this.wsService.taskCreated$.subscribe(() => {
+      this.loadStats();
+    }));
+    this.subscriptions.add(this.wsService.taskUpdated$.subscribe(() => {
+      this.loadStats();
+    }));
+    this.subscriptions.add(this.wsService.taskDeleted$.subscribe(() => {
+      this.loadStats();
+    }));
+  }
+
+  ngOnDestroy() {
+    this.subscriptions.unsubscribe();
   }
 
   loadStats() {

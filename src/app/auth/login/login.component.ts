@@ -10,6 +10,7 @@ import {
 import { Router, RouterLink } from '@angular/router';
 import { NgClass } from '@angular/common';
 import { NotificationService } from '../../services/notification.service';
+import { WebsocketService } from '../../services/websocket.service';
 
 @Component({
     selector: 'app-login',
@@ -27,6 +28,7 @@ export class LoginComponent {
   private authService = inject(AuthService);
   private fb = inject(FormBuilder);
   private notificationService = inject(NotificationService);
+  private wsService = inject(WebsocketService);
 
   constructor() {
     this.loginForm = this.fb.group({
@@ -47,6 +49,9 @@ export class LoginComponent {
     if (this.loginForm.invalid) {
       return;
     }
+    // Request permission synchronously during the user click event
+    this.wsService.requestNotificationPermission();
+
     this.setLoadingState(true);
     const data = this.getFormData();
     this.authService.login(data).subscribe({
@@ -68,6 +73,7 @@ export class LoginComponent {
 
   private handleLoginSuccess(): void {
     this.setLoadingState(false);
+    this.wsService.connect();
     this.notificationService.success('Welcome back! You have successfully logged in.', 'Login Successful');
     this.router.navigate(['/tasks']);
   }

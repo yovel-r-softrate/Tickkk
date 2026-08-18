@@ -12,6 +12,12 @@ dotenv.config();
 
 // Initialize Express app
 const app = express();
+const http = require('http');
+const server = http.createServer(app);
+
+// Initialize Socket.IO
+const socketConfig = require('./socket');
+socketConfig.init(server);
 
 // Connect to MongoDB
 connectDB();
@@ -67,7 +73,7 @@ app.get('', (req, res) => {
 
 // Start server
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
+server.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
     console.log(`API Documentation available at http://localhost:${PORT}/api-docs`);
 });

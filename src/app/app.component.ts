@@ -8,6 +8,7 @@ import { Visit } from './core/models/visit.model';
 import { ToastComponent } from './shared/toast/toast.component';
 import { AiAssistantComponent } from './shared/ai-assistant/ai-assistant.component';
 import { AuthService } from './services/auth.service';
+import { WebsocketService } from './services/websocket.service';
 
 @Component({
   selector: 'app-root',
@@ -24,6 +25,7 @@ export class AppComponent implements OnInit {
 
   private trackService = inject(TrackService);
   private authService = inject(AuthService);
+  private wsService = inject(WebsocketService);
   meta = inject(Meta);
 
   constructor() {
@@ -58,6 +60,10 @@ export class AppComponent implements OnInit {
 
   ngOnInit() {
     this.authService.autoLogin();
+    if (this.authService.isAuthenticated()) {
+      this.wsService.connect();
+      this.wsService.requestNotificationPermission();
+    }
     this.trackVisit();
   }
 

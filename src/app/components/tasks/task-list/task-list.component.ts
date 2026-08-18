@@ -1,4 +1,4 @@
-import { Component, inject, OnInit, signal } from '@angular/core';
+import { Component, inject, OnInit, OnDestroy, signal } from '@angular/core';
 import { TaskService } from '../../../services/task.service';
 import { Task } from '../../../core/models/tasks.model';
 import { RouterLink } from '@angular/router';
@@ -7,13 +7,15 @@ import { AuthService } from '../../../services/auth.service';
 import { FormsModule } from '@angular/forms';
 import { DeadlineAlertPipe } from '../../../shared/pipes/deadline-alert.pipe';
 import { ResizableColumnDirective } from '../../../shared/directives/resizable-column.directive';
+import { WebsocketService } from '../../../services/websocket.service';
+import { Subscription } from 'rxjs';
 
 @Component({
     selector: 'app-task-list',
     imports: [RouterLink, NgClass, DatePipe, DeadlineAlertPipe, FormsModule, ResizableColumnDirective],
     templateUrl: './task-list.component.html',
 })
-export class TaskListComponent implements OnInit {
+export class TaskListComponent implements OnInit, OnDestroy {
   completedTasks = signal<Task[]>([]);
   pendingTasks = signal<Task[]>([]);
 
@@ -41,6 +43,8 @@ export class TaskListComponent implements OnInit {
 
   taskService = inject(TaskService);
   auth = inject(AuthService);
+  wsService = inject(WebsocketService);
+  private subscriptions = new Subscription();
 
   completedLoading = signal<boolean>(false);
   pendingLoading = signal<boolean>(false);
@@ -60,6 +64,20 @@ export class TaskListComponent implements OnInit {
 
   ngOnInit() {
     this.refreshData();
+    
+    this.subscriptions.add(this.wsService.taskCreated$.subscribe(() => {
+      this.refreshData();
+    }));
+    this.subscriptions.add(this.wsService.taskUpdated$.subscribe(() => {
+      this.refreshData();
+    }));
+    this.subscriptions.add(this.wsService.taskDeleted$.subscribe(() => {
+      this.refreshData();
+    }));
+  }
+
+  ngOnDestroy() {
+    this.subscriptions.unsubscribe();
   }
 
   loadCompletedTasks(page: number, limit: number) {

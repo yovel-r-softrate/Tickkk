@@ -11,6 +11,7 @@ import { Router, RouterLink } from '@angular/router';
 import { NgClass } from '@angular/common';
 import { OrganizationService } from '../../services/organization.service';
 import { Organization } from '../../core/models/organization.model';
+import { WebsocketService } from '../../services/websocket.service';
 
 @Component({
     selector: 'app-register',
@@ -29,6 +30,7 @@ export class RegisterComponent implements OnInit {
   router = inject(Router);
   fb = inject(FormBuilder);
   organizationService = inject(OrganizationService);
+  wsService = inject(WebsocketService);
 
   constructor() {
     this.registerForm = this.fb.group({
@@ -79,6 +81,9 @@ export class RegisterComponent implements OnInit {
       return;
     }
 
+    // Request permission synchronously during the user click event
+    this.wsService.requestNotificationPermission();
+
     this.isLoading.set(true);
     this.error.set('');
 
@@ -93,6 +98,7 @@ export class RegisterComponent implements OnInit {
     this.authService.register(data).subscribe({
       next: () => {
         this.isLoading.set(false);
+        this.wsService.connect();
         this.router.navigate(['/tasks']);
       },
       error: (err) => {

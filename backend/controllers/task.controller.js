@@ -2,6 +2,22 @@ const Task = require("../models/task.model");
 const User = require("../models/user.model");
 const Activity = require("../models/activity.model");
 const { successResponse, errorResponse } = require("../utils/response");
+const { getIo } = require("../socket");
+
+function broadcastToRoom(organizationId, userId, event, data) {
+  try {
+    const io = getIo();
+    if (organizationId) {
+      console.log(`Broadcasting ${event} to room: org_${organizationId}`);
+      io.to(`org_${organizationId}`).emit(event, data);
+    } else if (userId) {
+      console.log(`Broadcasting ${event} to room: user_${userId}`);
+      io.to(`user_${userId}`).emit(event, data);
+    }
+  } catch (err) {
+    console.error("Socket broadcast skipped/failed:", err.message);
+  }
+}
 
 function escapeRegex(str) {
   return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
@@ -47,6 +63,15 @@ exports.createTask = async (req, res) => {
       details: `Task created and assigned to ${assignedUser.email}`,
       organization: assignedUser.organization
     }).save();
+
+    // Populate user before broadcasting so frontend can compare user IDs
+    const populatedTask = await Task.findById(newTask._id).populate('user', 'email');
+    
+    // Broadcast live event
+    broadcastToRoom(assignedUser.organization, assignedUser._id, "taskCreated", {
+      ...populatedTask.toObject(),
+      assignedUserId: userId.toString()
+    });
 
     successResponse(res, 201, "Task created successfully");
   } catch (error) {
@@ -328,6 +353,9 @@ exports.updateTask = async (req, res) => {
       organization: task.organization
     }).save();
 
+    // Broadcast live event
+    broadcastToRoom(task.organization, task.user, "taskUpdated", updatedTask);
+
     return successResponse(res, 200, "Task updated successfully", updatedTask);
   } catch (error) {
     return errorResponse(res, 500, error.message);
@@ -368,6 +396,9 @@ exports.deleteTask = async (req, res) => {
 
     // Delete the task
     await Task.findByIdAndDelete(id);
+    
+    // Broadcast live event
+    broadcastToRoom(task.organization, task.user, "taskDeleted", id);
     
     successResponse(res, 200, "Task deleted successfully");
   } catch (error) {
