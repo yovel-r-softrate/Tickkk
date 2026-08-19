@@ -81,10 +81,10 @@ export class TaskDetailComponent implements OnInit {
     return t?.subtasks?.length || 0;
   }
 
-  getUserEmail(user: any): string {
+  getUserName(user: any): string {
     if (!user) return 'Unassigned';
     if (typeof user === 'string') return user;
-    return user.email || 'Unassigned';
+    return user.name || user.email || 'Unassigned';
   }
 
   goBack(): void {

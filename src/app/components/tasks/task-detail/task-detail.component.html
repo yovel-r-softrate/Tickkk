@@ -146,7 +146,7 @@
                   <span class="h-5 w-5 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center text-[10px] text-gray-500 font-bold border border-gray-200 dark:border-gray-700">
                     <i class="far fa-user text-[8px]"></i>
                   </span>
-                  {{ getUserEmail(currentTask.user) }}
+                  {{ getUserName(currentTask.user) }}
                 </span>
               </div>
               
@@ -256,7 +256,7 @@
                         <span>{{ activity.createdAt | date:'MMM d, h:mm a' }}</span>
                       </div>
                       <p class="font-medium text-gray-800 dark:text-gray-300 leading-normal">{{ activity.details }}</p>
-                      <p class="text-[10px] text-gray-500 dark:text-gray-450 italic">{{ getUserEmail(activity.user) }}</p>
+                      <p class="text-[10px] text-gray-500 dark:text-gray-450 italic">{{ getUserName(activity.user) }}</p>
                     </div>
                   </div>
                 }

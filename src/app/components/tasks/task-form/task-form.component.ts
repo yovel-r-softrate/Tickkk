@@ -53,13 +53,15 @@ export class TaskFormComponent {
 
   constructor() {
     this.minDateTime = this.getLocalISOString(new Date());
+    const currentUserId = this.auth.getCurrentUserId() || '';
+    
     this.taskForm = this.fb.group({
       title: ['', [Validators.required, Validators.minLength(3)]],
       description: ['', [Validators.required, Validators.minLength(3)]],
       tag: [''],
       deadline: [this.getDefaultDeadline(), Validators.required],
       priority: ['', Validators.required],
-      userId: ['', Validators.required],
+      userId: [currentUserId, Validators.required],
       subtasks: this.fb.array([])
     });
   }
@@ -152,6 +154,15 @@ export class TaskFormComponent {
       next: (response) => {
         if (response.status === 'success') {
           this.users = response.data.users || [];
+          
+          // Pre-fill the search query with the current user's name if selected
+          const currentUserId = this.taskForm.get('userId')?.value;
+          if (currentUserId) {
+            const matchedUser = this.users.find(u => u._id === currentUserId);
+            if (matchedUser) {
+              this.userSearchQuery.set(matchedUser.name || matchedUser.email);
+            }
+          }
         }
         this.loading.set(false);
       },

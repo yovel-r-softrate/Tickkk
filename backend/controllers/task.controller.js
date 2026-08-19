@@ -29,14 +29,20 @@ exports.createTask = async (req, res) => {
     const { title, description, tag, deadline, priority, userId, subtasks } = req.body;
     
     
-    // HRMS integration: we don't query local user DB, assume userId is a valid HRMS ID
-    const assignedUser = { _id: userId, companyId: req.user.companyId, email: 'user@hrms' };
+    // Fetch HRMS users to get assigned user's name
+    const { getHrmsUsers } = require("../utils/hrms.client");
+    let assignedUserName = 'a team member';
+    try {
+      const users = await getHrmsUsers(req.user.companyId, req.headers.authorization);
+      const matchedUser = users.find(u => u._id === userId);
+      if (matchedUser) {
+        assignedUserName = matchedUser.name || matchedUser.email || 'a team member';
+      }
+    } catch (err) {
+      console.error("Failed to fetch assigned user details:", err.message);
+    }
 
-    
-
-    
     const currentUser = req.user;
-    // Flat model: anyone in the company can assign to anyone
     
     const newTask = new Task({
       title,
@@ -57,7 +63,7 @@ exports.createTask = async (req, res) => {
       task: newTask._id,
       user: req.user.id,
       action: "created",
-      details: `Task created and assigned to ${assignedUser.email}`,
+      details: `Task created and assigned to ${assignedUserName}`,
       organization: currentUser.companyId
     }).save();
 
@@ -65,7 +71,7 @@ exports.createTask = async (req, res) => {
     const populatedTask = await Task.findById(newTask._id);
     
     // Broadcast live event
-    broadcastToRoom(assignedUser.organization, assignedUser._id, "taskCreated", {
+    broadcastToRoom(currentUser.companyId, userId, "taskCreated", {
       ...populatedTask.toObject(),
       assignedUserId: userId.toString()
     });
@@ -303,7 +309,7 @@ exports.getAllTasksForUser = async (req, res) => {
 // Get a single task by ID
 exports.getTaskById = async (req, res) => {
   try {
-    const task = await Task.findOne({ _id: req.params.id });
+    const task = await Task.findOne({ _id: req.params.id }).lean();
     if (!task) {
       return errorResponse(res, 404, "Task not found");
     }
@@ -311,6 +317,18 @@ exports.getTaskById = async (req, res) => {
     const currentUser = req.user;
     if (task.organization !== currentUser.companyId) {
       return errorResponse(res, 403, "Not authorized to view this task");
+    }
+
+    // Attach user info from HRMS
+    const { getHrmsUsers } = require("../utils/hrms.client");
+    try {
+      const users = await getHrmsUsers(currentUser.companyId, req.headers.authorization);
+      const assignedUser = users.find(u => u._id === task.user?.toString());
+      if (assignedUser) {
+        task.user = assignedUser;
+      }
+    } catch (err) {
+      console.error("Failed to fetch HRMS users for getTaskById", err.message);
     }
 
     successResponse(res, 200, "Task retrieved successfully", task);
@@ -472,8 +490,21 @@ exports.getTaskActivities = async (req, res) => {
     }
 
     const activities = await Activity.find({ task: req.params.id })
-      .populate("user", "email")
+      .lean()
       .sort({ createdAt: -1 });
+
+    const { getHrmsUsers } = require("../utils/hrms.client");
+    try {
+      const users = await getHrmsUsers(currentUser.companyId, req.headers.authorization);
+      activities.forEach(activity => {
+        const u = users.find(u => u._id === activity.user?.toString());
+        if (u) {
+          activity.user = u;
+        }
+      });
+    } catch (err) {
+      console.error("Failed to fetch HRMS users for getTaskActivities", err.message);
+    }
 
     successResponse(res, 200, "Activities retrieved successfully", activities);
   } catch (error) {
