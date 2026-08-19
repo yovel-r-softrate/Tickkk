@@ -2,7 +2,7 @@ import { Component, inject, OnInit, OnDestroy, signal, computed } from '@angular
 import { TaskService } from '../../../services/task.service';
 import { Task } from '../../../core/models/tasks.model';
 import { RouterLink } from '@angular/router';
-import { NgClass, DatePipe } from '@angular/common';
+import { NgClass, DatePipe, DecimalPipe } from '@angular/common';
 import { AuthService } from '../../../services/auth.service';
 import { FormsModule } from '@angular/forms';
 import { DeadlineAlertPipe } from '../../../shared/pipes/deadline-alert.pipe';
@@ -12,7 +12,7 @@ import { Subscription } from 'rxjs';
 
 @Component({
     selector: 'app-task-list',
-    imports: [RouterLink, NgClass, DatePipe, DeadlineAlertPipe, FormsModule, ResizableColumnDirective],
+    imports: [RouterLink, NgClass, DatePipe, DecimalPipe, DeadlineAlertPipe, FormsModule, ResizableColumnDirective],
     templateUrl: './task-list.component.html',
 })
 export class TaskListComponent implements OnInit, OnDestroy {

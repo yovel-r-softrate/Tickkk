@@ -97,7 +97,7 @@ export class LoginComponent implements OnInit {
           this.loginForm.get('identifier')?.disable();
           this.loginForm.get('password')?.disable();
           this.loginForm.get('companyCode')?.disable();
-          this.notificationService.info('Please enter your 6-digit MFA verification code.', 'MFA Required');
+          this.notificationService.info('Please enter your 6-digit PeopleSoft verification code.', 'Verification Required');
         } else {
           this.handleLoginSuccess();
         }

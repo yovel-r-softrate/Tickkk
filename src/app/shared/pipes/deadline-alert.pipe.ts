@@ -22,7 +22,7 @@ export class DeadlineAlertPipe implements PipeTransform {
     if (diffMs < 0) {
       return {
         text: 'OVERDUE',
-        colorClass: 'bg-red-600 text-white',
+        colorClass: 'bg-rose-50 text-rose-700 border border-rose-200/80 dark:bg-rose-950/40 dark:text-rose-300 dark:border-rose-800/60',
         urgency: 'overdue'
       };
     }
@@ -32,7 +32,7 @@ export class DeadlineAlertPipe implements PipeTransform {
       const mins = Math.floor((diffHours % 1) * 60);
       return {
         text: `DUE IN ${hours > 0 ? hours + 'h' : ''} ${mins}m`,
-        colorClass: 'bg-orange-500 text-white animate-pulse',
+        colorClass: 'bg-amber-50 text-amber-700 border border-amber-200/80 dark:bg-amber-950/40 dark:text-amber-300 dark:border-amber-800/60',
         urgency: 'urgent'
       };
     }
@@ -41,14 +41,14 @@ export class DeadlineAlertPipe implements PipeTransform {
       const days = Math.floor(diffHours / 24);
       return {
         text: `DUE IN ${days}d`,
-        colorClass: 'bg-yellow-400 text-gray-900',
+        colorClass: 'bg-blue-50 text-blue-700 border border-blue-200/80 dark:bg-blue-950/40 dark:text-blue-300 dark:border-blue-800/60',
         urgency: 'soon'
       };
     }
 
     return {
       text: 'ON TRACK',
-      colorClass: 'bg-green-100 text-green-700',
+      colorClass: 'bg-emerald-50 text-emerald-700 border border-emerald-200/80 dark:bg-emerald-950/40 dark:text-emerald-300 dark:border-emerald-800/60',
       urgency: 'normal'
     };
   }

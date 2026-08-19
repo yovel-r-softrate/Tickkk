@@ -87,21 +87,28 @@
         </div>
       } @else {
         <!-- MFA Verification Code Field -->
-        <div>
-          <label for="mfaCode" class="block text-sm font-medium text-gray-700 mb-1 dark:text-gray-300">MFA Verification Code</label>
-          <div class="relative">
-            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-              <i class="fas fa-key text-gray-400 dark:text-gray-400"></i>
+        <div class="space-y-4 animate-fade-in">
+          <div class="text-center">
+            <h3 class="text-lg font-bold text-gray-900 dark:text-white">PeopleSoft Verification</h3>
+            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Enter the 6-digit MFA code belonging to your PeopleSoft account to verify your identity.</p>
+          </div>
+
+          <div>
+            <div class="relative">
+              <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <i class="fas fa-key text-gray-400 dark:text-gray-500"></i>
+              </div>
+              <input id="mfaCode" type="text" formControlName="mfaCode" name="mfaCode"
+                class="w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-brand-500 dark:border-gray-700 dark:bg-gray-900 dark:text-white text-center text-xl tracking-[0.5em] font-mono font-bold"
+                placeholder="123456" autocomplete="off" maxlength="6">
             </div>
-            <input id="mfaCode" type="text" formControlName="mfaCode" name="mfaCode"
-              class="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100 dark:focus:ring-blue-400 text-center text-lg tracking-widest font-mono"
-              placeholder="e.g. 123456" autocomplete="off" maxlength="6">
+            @if (loginForm.get('mfaCode')?.invalid && (loginForm.get('mfaCode')?.dirty || loginForm.get('mfaCode')?.touched)) {
+            <div class="text-red-500 text-xs mt-1.5 flex items-center gap-1">
+              <i class="fas fa-exclamation-circle text-[10px]"></i>
+              <span>Please enter a valid 6-digit MFA code</span>
+            </div>
+            }
           </div>
-          @if (loginForm.get('mfaCode')?.invalid && (loginForm.get('mfaCode')?.dirty || loginForm.get('mfaCode')?.touched)) {
-          <div class="text-red-500 text-sm mt-1">
-            <p><i class="fas fa-info-circle mr-1"></i>Please enter a valid 6-digit MFA code</p>
-          </div>
-          }
         </div>
       }
 
@@ -121,7 +128,7 @@
       <!-- Sign Up / Forgot Password Link (Managed by HR) -->
       <div class="text-center mt-6">
         <p class="text-sm text-gray-500 dark:text-gray-400">
-          Account management is handled by HRMS. Contact your administrator if you need access or forgot your password.
+          Account management is handled by PeopleSoft. If you need to reset your password, please do it on PeopleSoft.
         </p>
       </div>
     </form>
