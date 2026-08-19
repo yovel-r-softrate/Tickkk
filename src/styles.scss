@@ -1053,15 +1053,15 @@ body.mobile-device {
 
 ::view-transition-new(root) {
   z-index: 9999;
-  animation: circular-reveal 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+  animation: circular-reveal 1s cubic-bezier(0.4, 0, 0.2, 1) forwards;
 }
 
 @keyframes circular-reveal {
   from {
-    clip-path: circle(0% at 50% 50%);
+    clip-path: circle(0px at var(--theme-click-x, 50%) var(--theme-click-y, 50%));
   }
   to {
-    clip-path: circle(120% at 50% 50%);
+    clip-path: circle(150% at var(--theme-click-x, 50%) var(--theme-click-y, 50%));
   }
 }
 

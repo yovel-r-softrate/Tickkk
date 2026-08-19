@@ -1,4 +1,4 @@
-import { Component, inject, signal, computed } from '@angular/core';
+import { Component, inject, signal, computed, OnInit } from '@angular/core';
 import { AuthService } from '../../services/auth.service';
 import {
   FormBuilder,
@@ -7,17 +7,17 @@ import {
   ReactiveFormsModule,
   Validators,
 } from '@angular/forms';
-import { Router, RouterLink } from '@angular/router';
+import { Router } from '@angular/router';
 import { NgClass } from '@angular/common';
 import { NotificationService } from '../../services/notification.service';
 import { WebsocketService } from '../../services/websocket.service';
 
 @Component({
     selector: 'app-login',
-    imports: [ReactiveFormsModule, RouterLink, NgClass],
+    imports: [ReactiveFormsModule, NgClass],
     templateUrl: './login.component.html',
 })
-export class LoginComponent {
+export class LoginComponent implements OnInit {
   loginForm: FormGroup;
   error = signal<string>('');
   showPassword = signal<boolean>(false);
@@ -30,15 +30,27 @@ export class LoginComponent {
   private notificationService = inject(NotificationService);
   private wsService = inject(WebsocketService);
 
+  mfaRequired = signal<boolean>(false);
+  tempToken = signal<string>('');
+
   constructor() {
     this.loginForm = this.fb.group({
-      email: new FormControl('', [Validators.required, Validators.email]),
+      identifier: new FormControl('', [Validators.required]),
       password: new FormControl('', [
         Validators.required,
         Validators.minLength(6),
         Validators.maxLength(20),
       ]),
+      companyCode: new FormControl('', [Validators.required]),
+      mfaCode: new FormControl('', [])
     });
+  }
+
+  ngOnInit(): void {
+    const savedCompanyCode = this.authService.getCompanyCode();
+    if (savedCompanyCode) {
+      this.loginForm.patchValue({ companyCode: savedCompanyCode });
+    }
   }
 
   togglePasswordVisibility(): void {
@@ -46,7 +58,26 @@ export class LoginComponent {
   }
 
   onSubmit(): void {
+    if (this.loading()) {
+      return;
+    }
+
+    if (this.mfaRequired()) {
+      const mfaCodeControl = this.loginForm.get('mfaCode');
+      if (!mfaCodeControl?.value) {
+        mfaCodeControl?.markAsTouched();
+        return;
+      }
+      this.setLoadingState(true);
+      this.authService.verifyMfa(this.tempToken(), mfaCodeControl.value, this.loginForm.value.companyCode).subscribe({
+        next: () => this.handleLoginSuccess(),
+        error: (err) => this.handleLoginError(err)
+      });
+      return;
+    }
+
     if (this.loginForm.invalid) {
+      this.loginForm.markAllAsTouched();
       return;
     }
     // Request permission synchronously during the user click event
@@ -55,7 +86,22 @@ export class LoginComponent {
     this.setLoadingState(true);
     const data = this.getFormData();
     this.authService.login(data).subscribe({
-      next: () => this.handleLoginSuccess(),
+      next: (response) => {
+        this.setLoadingState(false);
+        if (response.success && response.mfaRequired) {
+          this.mfaRequired.set(true);
+          this.tempToken.set(response.tempToken);
+          // Set MFA validator dynamically and clear others
+          this.loginForm.get('mfaCode')?.setValidators([Validators.required, Validators.pattern(/^\d{6}$/)]);
+          this.loginForm.get('mfaCode')?.updateValueAndValidity();
+          this.loginForm.get('identifier')?.disable();
+          this.loginForm.get('password')?.disable();
+          this.loginForm.get('companyCode')?.disable();
+          this.notificationService.info('Please enter your 6-digit MFA verification code.', 'MFA Required');
+        } else {
+          this.handleLoginSuccess();
+        }
+      },
       error: (err) => this.handleLoginError(err),
     });
   }
@@ -64,10 +110,11 @@ export class LoginComponent {
     this.loading.set(state);
   }
 
-  private getFormData(): { email: string; password: string } {
+  private getFormData(): { identifier: string; password: string; companyCode: string } {
     return {
-      email: this.loginForm.value.email,
+      identifier: this.loginForm.value.identifier,
       password: this.loginForm.value.password,
+      companyCode: this.loginForm.value.companyCode,
     };
   }
 
@@ -75,7 +122,11 @@ export class LoginComponent {
     this.setLoadingState(false);
     this.wsService.connect();
     this.notificationService.success('Welcome back! You have successfully logged in.', 'Login Successful');
-    this.router.navigate(['/tasks']);
+    console.log('Navigating to /tasks...');
+    this.router.navigate(['/tasks']).then(
+      navigated => console.log('Navigation to /tasks successful:', navigated),
+      err => console.error('Navigation to /tasks failed:', err)
+    );
   }
 
   private handleLoginError(err: any): void {

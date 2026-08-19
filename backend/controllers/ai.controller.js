@@ -2,6 +2,7 @@ require("dotenv").config();
 const { GoogleGenAI } = require("@google/genai");
 const { successResponse, errorResponse } = require("../utils/response");
 const Task = require("../models/task.model");
+const { getHrmsUsers } = require("../utils/hrms.client");
 
 const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
 const MODEL = "gemini-3.5-flash-lite";
@@ -134,19 +135,39 @@ exports.askAssistant = async (req, res) => {
     const user = req.currentUser;
     
     if (user) {
-      const filter = user.organization 
-        ? { organization: user.organization } 
-        : { user: user._id, organization: null };
-
-      if (user.role !== 'admin' && user.role !== 'super') {
-        filter.user = user._id;
+      const filter = {};
+      
+      if (user.companyId) {
+        filter.organization = user.companyId;
+        if (user.role !== 'admin' && user.role !== 'super') {
+          filter.$or = [
+            { user: user.id },
+            { assignedByUser: user.id }
+          ];
+        }
+      } else {
+        filter.user = user.id;
+        filter.organization = null;
       }
       
-      const tasks = await Task.find(filter).populate('user', 'firstName lastName email').limit(30);
+      const tasks = await Task.find(filter).limit(30);
+      
+      let hrmsUsers = [];
+      try {
+        const token = req.header('Authorization');
+        if (token && user.companyId) {
+          hrmsUsers = await getHrmsUsers(user.companyId, token);
+        }
+      } catch (err) {
+        console.error("Failed to load HRMS users for AI context:", err.message);
+      }
+      
+      const userMap = new Map(hrmsUsers.map(u => [u._id.toString(), u]));
       
       if (tasks.length > 0) {
         dbContext = "User's real live tasks from the database:\n" + tasks.map((t, i) => {
-          const assigneeName = t.user ? (t.user.firstName ? `${t.user.firstName} ${t.user.lastName || ''}`.trim() : t.user.email) : 'Unassigned';
+          const assignedUser = t.user ? userMap.get(t.user.toString()) : null;
+          const assigneeName = assignedUser ? (assignedUser.name || assignedUser.email) : (t.user || 'Unassigned');
           return `${i + 1}. "${t.title}" - Assigned To: ${assigneeName}, Priority: ${t.priority || "Medium"}, Status: ${t.completed ? "Completed" : "Pending"}${t.deadline ? `, Deadline: ${new Date(t.deadline).toLocaleDateString()}` : ""}`;
         }).join("\n");
       } else {

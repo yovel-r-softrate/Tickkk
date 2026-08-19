@@ -72,18 +72,6 @@
                     >
                 </div>
 
-                <!-- Priority Filter -->
-                <select 
-                    [(ngModel)]="priorityFilter" 
-                    (change)="onFilterChange()"
-                    class="bg-transparent border border-gray-200 dark:border-gray-700 rounded-lg px-2.5 py-1.5 text-xs font-semibold uppercase tracking-wider text-gray-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 cursor-pointer dark:bg-gray-900 dark:text-gray-400"
-                >
-                    <option value="">All Priorities</option>
-                    <option value="High">High</option>
-                    <option value="Medium">Medium</option>
-                    <option value="Low">Low</option>
-                </select>
-
                 <!-- Sort By -->
                 <select 
                     [(ngModel)]="sortBy" 
@@ -114,10 +102,11 @@
                             <tr style="background-color: var(--bg-primary); border-bottom: 1px solid var(--border-color); color: var(--text-secondary);" class="dark:bg-gray-900 dark:border-gray-700 dark:text-gray-400 font-medium">
                                 <th appResizableColumn="title" style="padding: 16px; white-space: nowrap;">Task Title</th>
                                 <th appResizableColumn="description" style="padding: 16px; white-space: nowrap;">Description</th>
+                                <th appResizableColumn="subtasks" style="padding: 16px; width: 180px; white-space: nowrap;">Subtasks</th>
+                                <th appResizableColumn="tag" style="padding: 16px; width: 120px; white-space: nowrap;">Tag</th>
                                 <th appResizableColumn="priority" style="padding: 16px; width: 120px; white-space: nowrap;">Priority</th>
                                 <th appResizableColumn="deadline" style="padding: 16px; width: 150px; white-space: nowrap;">Deadline</th>
                                 <th appResizableColumn="alert" style="padding: 16px; width: 120px; white-space: nowrap;">Alert</th>
-                                <th appResizableColumn="status" style="padding: 16px; width: 120px; white-space: nowrap;">Status</th>
                                 <th style="padding: 16px; width: 100px; text-align: right; white-space: nowrap;">Actions</th>
                             </tr>
                             <tr style="background-color: var(--bg-secondary); border-bottom: 2px solid var(--border-color);" class="dark:bg-gray-800 dark:border-gray-700">
@@ -131,16 +120,22 @@
                                            [(ngModel)]="descriptionSearch" (ngModelChange)="onSearchChange()"
                                            class="w-full text-xs px-2 py-1.5 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-brand-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:placeholder-gray-400">
                                 </th>
+                                <th style="padding: 8px 16px;"></th>
+                                <th style="padding: 8px 16px;">
+                                    <input type="text" placeholder="Search Tag..."
+                                           [(ngModel)]="tagSearch" (ngModelChange)="onSearchChange()"
+                                           class="w-full text-xs px-2 py-1.5 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-brand-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:placeholder-gray-400">
+                                </th>
                                 <th style="padding: 8px 16px;">
                                     <select [(ngModel)]="prioritySearch" (ngModelChange)="onSearchChange()"
                                             class="w-full text-xs px-2 py-1.5 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-brand-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white">
                                         <option value="">All</option>
-                                        <option value="High">High</option>
-                                        <option value="Medium">Medium</option>
                                         <option value="Low">Low</option>
+                                        <option value="Medium">Medium</option>
+                                        <option value="High">High</option>
+                                        <option value="Critical">Critical</option>
                                     </select>
                                 </th>
-                                <th style="padding: 8px 16px;"></th>
                                 <th style="padding: 8px 16px;"></th>
                                 <th style="padding: 8px 16px;"></th>
                                 <th style="padding: 8px 16px;"></th>
@@ -148,18 +143,18 @@
                         </thead>
                         <tbody>
                             @if (activeTab() === 'ongoing') {
-                                @if(pendingLoading()) {
+                                @if(pendingLoading() && pendingTasks().length === 0) {
                                     <tr>
-                                        <td colspan="5" style="padding: 40px; text-align: center;">
+                                        <td colspan="8" style="padding: 40px; text-align: center;">
                                             <div class="flex justify-center mb-4">
                                                 <div class="w-8 h-8 border-4 border-brand-500 border-t-transparent rounded-full animate-spin"></div>
                                             </div>
                                             <div style="color: var(--text-secondary); font-weight: 500;">Loading ongoing tasks...</div>
                                         </td>
                                     </tr>
-                                } @else if(pendingTasks().length === 0) {
+                                } @else if(pendingTasks().length === 0 && !pendingLoading()) {
                                     <tr>
-                                        <td colspan="7" style="padding: 40px; text-align: center;">
+                                        <td colspan="8" style="padding: 40px; text-align: center;">
                                             <div class="bg-brand-50 w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-4 dark:bg-brand-900/30">
                                                 <i class="fas fa-check text-brand-500 text-xl"></i>
                                             </div>
@@ -171,33 +166,43 @@
                                     </tr>
                                 } @else {
                                     @for (task of pendingPaginatedTasks(); track task._id) {
-                                        <tr style="border-bottom: 1px solid var(--border-color);" class="hover:bg-gray-50 transition-colors dark:border-gray-700 dark:hover:bg-gray-700/30 group">
+                                        <tr style="border-bottom: 1px solid var(--border-color); background-color: var(--bg-primary); transition: background-color 0.2s;" class="hover:bg-gray-50 dark:hover:bg-gray-800/50 dark:bg-gray-900 dark:border-gray-800" [ngClass]="{'opacity-50 pointer-events-none': pendingLoading()}">
                                             <td style="padding: 16px; white-space: nowrap;">
                                                 <a [routerLink]="['/tasks', task._id]" class="block">
                                                     <div style="font-weight: 600; font-size: 14px; color: var(--text-primary);" class="dark:text-gray-100 group-hover:text-brand-600 transition-colors">{{ task.title }}</div>
-                                                    @if (getSubtaskProgress(task)) {
-                                                        <div class="mt-3 w-full min-w-[150px]">
-                                                            <div class="flex justify-between text-xs mb-1 text-gray-500 dark:text-gray-400">
-                                                                <span><i class="fas fa-tasks mr-1"></i> Subtasks</span>
-                                                                <span class="font-bold">{{ getSubtaskProgress(task) }}</span>
-                                                            </div>
-                                                            <div class="w-full bg-gray-200 rounded-full h-1.5 dark:bg-gray-600">
-                                                                <div class="bg-brand-600 h-1.5 rounded-full transition-all duration-500" [style.width.%]="getSubtaskProgressPercentage(task)"></div>
-                                                            </div>
-                                                        </div>
-                                                    }
                                                 </a>
                                             </td>
                                             <td style="padding: 16px; color: var(--text-secondary); max-width: 300px;" class="dark:text-gray-400">
                                                 <div class="truncate" [title]="task.description">{{ task.description }}</div>
                                             </td>
                                             <td style="padding: 16px; white-space: nowrap;">
+                                                @if (getSubtaskProgress(task)) {
+                                                    <div class="w-full min-w-[150px]">
+                                                        <div class="flex justify-between text-xs mb-1 text-gray-500 dark:text-gray-400">
+                                                            <span class="font-bold text-gray-700 dark:text-gray-300">{{ getSubtaskProgress(task) }}</span>
+                                                        </div>
+                                                        <div class="w-full bg-gray-200 rounded-full h-1.5 dark:bg-gray-700">
+                                                            <div class="bg-brand-600 h-1.5 rounded-full transition-all duration-500" [style.width.%]="getSubtaskProgressPercentage(task)"></div>
+                                                        </div>
+                                                    </div>
+                                                } @else {
+                                                    <span class="text-xs text-gray-400 dark:text-gray-600 italic">No subtasks</span>
+                                                }
+                                            </td>
+                                            <td style="padding: 16px; white-space: nowrap;">
+                                                @if (task.tag) {
+                                                    <span class="px-2 py-0.5 rounded text-[10px] font-medium bg-gray-100 text-gray-700 border border-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:border-gray-700">{{ task.tag }}</span>
+                                                }
+                                            </td>
+                                            <td style="padding: 16px; white-space: nowrap;">
                                                 <span [ngClass]="{
+                                                    'bg-purple-50 text-purple-700 border-purple-200 dark:bg-purple-900/30 dark:text-purple-400 dark:border-purple-800': task.priority === 'Critical',
                                                     'bg-red-50 text-red-700 border-red-200 dark:bg-red-900/30 dark:text-red-400 dark:border-red-800': task.priority === 'High',
                                                     'bg-yellow-50 text-yellow-700 border-yellow-200 dark:bg-yellow-900/30 dark:text-yellow-400 dark:border-yellow-800': task.priority === 'Medium',
-                                                    'bg-green-50 text-green-700 border-green-200 dark:bg-green-900/30 dark:text-green-400 dark:border-green-800': task.priority === 'Low'
-                                                }" class="px-2.5 py-1 rounded-md text-xs font-semibold border inline-flex items-center">
+                                                    'bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-900/30 dark:text-blue-400 dark:border-blue-800': task.priority === 'Low'
+                                                }" class="px-2.5 py-1 rounded-md text-[10px] font-bold tracking-wide uppercase border inline-flex items-center shadow-sm">
                                                     <span class="w-1.5 h-1.5 rounded-full mr-1.5" [ngClass]="{
+                                                        'bg-purple-500': task.priority === 'Critical',
                                                         'bg-red-500': task.priority === 'High',
                                                         'bg-yellow-500': task.priority === 'Medium',
                                                         'bg-green-500': task.priority === 'Low'
@@ -205,11 +210,8 @@
                                                     {{ task.priority }}
                                                 </span>
                                             </td>
-                                            <td style="padding: 16px; color: var(--text-secondary);" class="dark:text-gray-400">
-                                                <div class="flex items-center">
-                                                    <i class="far fa-calendar mr-2"></i>
-                                                    {{ task.deadline | date:'MMM d, y' }}
-                                                </div>
+                                            <td style="padding: 16px; color: var(--text-secondary); white-space: nowrap;" class="dark:text-gray-400">
+                                                {{ task.deadline | date:'MMM d, y, h:mm a' }}
                                             </td>
                                             <td style="padding: 16px; white-space: nowrap;">
                                                 @if (task.deadline | deadlineAlert; as alert) {
@@ -217,12 +219,6 @@
                                                         {{ alert.text }}
                                                     </span>
                                                 }
-                                            </td>
-                                            <td style="padding: 16px; white-space: nowrap;">
-                                                <span class="px-2.5 py-1 rounded-md text-xs font-medium bg-brand-50 text-brand-700 border border-brand-200 dark:bg-brand-900/30 dark:text-brand-400 dark:border-brand-800 flex items-center w-max">
-                                                    <div class="w-2 h-2 rounded-full border-2 border-brand-500 border-t-transparent animate-spin mr-1.5"></div>
-                                                    Ongoing
-                                                </span>
                                             </td>
                                             <td style="padding: 16px; text-align: right;">
                                                 <button (click)="toggleTaskStatus(task, true)" 
@@ -235,18 +231,18 @@
                                     }
                                 }
                             } @else {
-                                @if(completedLoading()) {
+                                @if(completedLoading() && completedTasks().length === 0) {
                                     <tr>
-                                        <td colspan="7" style="padding: 40px; text-align: center;">
+                                        <td colspan="8" style="padding: 40px; text-align: center;">
                                             <div class="flex justify-center mb-4">
                                                 <div class="w-8 h-8 border-4 border-green-500 border-t-transparent rounded-full animate-spin"></div>
                                             </div>
                                             <div style="color: var(--text-secondary); font-weight: 500;">Loading completed tasks...</div>
                                         </td>
                                     </tr>
-                                } @else if(completedTasks().length === 0) {
+                                } @else if(completedTasks().length === 0 && !completedLoading()) {
                                     <tr>
-                                        <td colspan="7" style="padding: 40px; text-align: center;">
+                                        <td colspan="8" style="padding: 40px; text-align: center;">
                                             <div class="bg-green-50 w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-4 dark:bg-green-900/30">
                                                 <i class="fas fa-clipboard-list text-green-500 text-xl"></i>
                                             </div>
@@ -255,7 +251,7 @@
                                     </tr>
                                 } @else {
                                     @for (task of completedPaginatedTasks(); track task._id) {
-                                        <tr style="border-bottom: 1px solid var(--border-color);" class="hover:bg-gray-50 transition-colors dark:border-gray-700 dark:hover:bg-gray-700/30 group">
+                                        <tr style="border-bottom: 1px solid var(--border-color); background-color: var(--bg-primary); transition: background-color 0.2s;" class="hover:bg-gray-50 dark:hover:bg-gray-800/50 dark:bg-gray-900 dark:border-gray-800" [ngClass]="{'opacity-50 pointer-events-none': completedLoading()}">
                                             <td style="padding: 16px; opacity: 0.7; white-space: nowrap;">
                                                 <a [routerLink]="['/tasks', task._id]" class="block">
                                                     <div style="font-weight: 600; font-size: 14px;" class="line-through text-gray-500 dark:text-gray-400 group-hover:text-green-600 transition-colors">{{ task.title }}</div>
@@ -265,28 +261,45 @@
                                                 <div class="truncate line-through" [title]="task.description">{{ task.description }}</div>
                                             </td>
                                             <td style="padding: 16px; opacity: 0.7; white-space: nowrap;">
+                                                @if (getSubtaskProgress(task)) {
+                                                    <div class="w-full min-w-[150px]">
+                                                        <div class="flex justify-between text-xs mb-1 text-gray-500 dark:text-gray-450">
+                                                            <span class="font-bold line-through">{{ getSubtaskProgress(task) }}</span>
+                                                        </div>
+                                                        <div class="w-full bg-gray-200 rounded-full h-1.5 dark:bg-gray-700">
+                                                            <div class="bg-green-600 h-1.5 rounded-full transition-all duration-500" [style.width.%]="getSubtaskProgressPercentage(task)"></div>
+                                                        </div>
+                                                    </div>
+                                                } @else {
+                                                    <span class="text-xs text-gray-400 dark:text-gray-550 italic">No subtasks</span>
+                                                }
+                                            </td>
+                                            <td style="padding: 16px; opacity: 0.7; white-space: nowrap;">
+                                                @if (task.tag) {
+                                                    <span class="px-2 py-0.5 rounded text-[10px] font-medium bg-gray-100 text-gray-700 border border-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:border-gray-700">{{ task.tag }}</span>
+                                                }
+                                            </td>
+                                            <td style="padding: 16px; opacity: 0.7; white-space: nowrap;">
                                                 <span [ngClass]="{
+                                                    'bg-purple-50 text-purple-700 border-purple-200 dark:bg-purple-900/30 dark:text-purple-400 dark:border-purple-800': task.priority === 'Critical',
                                                     'bg-red-50 text-red-700 border-red-200 dark:bg-red-900/30 dark:text-red-400 dark:border-red-800': task.priority === 'High',
                                                     'bg-yellow-50 text-yellow-700 border-yellow-200 dark:bg-yellow-900/30 dark:text-yellow-400 dark:border-yellow-800': task.priority === 'Medium',
-                                                    'bg-green-50 text-green-700 border-green-200 dark:bg-green-900/30 dark:text-green-400 dark:border-green-800': task.priority === 'Low'
-                                                }" class="px-2.5 py-1 rounded-md text-xs font-semibold border inline-flex items-center grayscale">
+                                                    'bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-900/30 dark:text-blue-400 dark:border-blue-800': task.priority === 'Low'
+                                                }" class="px-2.5 py-1 rounded-md text-[10px] font-bold tracking-wide uppercase border inline-flex items-center grayscale shadow-sm">
+                                                    <span class="w-1.5 h-1.5 rounded-full mr-1.5" [ngClass]="{
+                                                        'bg-purple-500': task.priority === 'Critical',
+                                                        'bg-red-500': task.priority === 'High',
+                                                        'bg-yellow-500': task.priority === 'Medium',
+                                                        'bg-green-500': task.priority === 'Low'
+                                                    }"></span>
                                                     {{ task.priority }}
                                                 </span>
                                             </td>
-                                            <td style="padding: 16px; color: var(--text-secondary); opacity: 0.7;" class="dark:text-gray-500">
-                                                <span class="flex items-center">
-                                                    <i class="far fa-calendar mr-2"></i>
-                                                    {{ task.deadline | date:'MMM d, y' }}
-                                                </span>
+                                            <td style="padding: 16px; color: var(--text-secondary); opacity: 0.7; white-space: nowrap;" class="dark:text-gray-500">
+                                                {{ task.deadline | date:'MMM d, y, h:mm a' }}
                                             </td>
                                             <td style="padding: 16px; opacity: 0.7; white-space: nowrap;">
                                                 <!-- Completed tasks don't show deadline alerts -->
-                                            </td>
-                                            <td style="padding: 16px; opacity: 0.7; white-space: nowrap;">
-                                                <span class="px-2.5 py-1 rounded-md text-xs font-medium bg-green-50 text-green-700 border border-green-200 dark:bg-green-900/30 dark:text-green-400 dark:border-green-800 flex items-center w-max">
-                                                    <i class="fas fa-check-circle mr-1.5 text-green-500"></i>
-                                                    Completed
-                                                </span>
                                             </td>
                                             <td style="padding: 16px; text-align: right;">
                                                 <button (click)="toggleTaskStatus(task, false)" 

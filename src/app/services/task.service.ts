@@ -20,12 +20,12 @@ export class TaskService {
     return this.http.get<Tasks>(this.apiUrl);
   }
 
-  getCompletedTasks(page: number, limit: number, search: string = '', priority: string = '', titleSearch: string = '', descriptionSearch: string = ''): Observable<Tasks> {
-    return this.http.get<Tasks>(`${this.apiUrl}/completed?page=${page}&limit=${limit}&search=${search}&priority=${priority}&titleSearch=${titleSearch}&descriptionSearch=${descriptionSearch}`);
+  getCompletedTasks(page: number, limit: number, search: string = '', priority: string = '', titleSearch: string = '', descriptionSearch: string = '', tagSearch: string = ''): Observable<Tasks> {
+    return this.http.get<Tasks>(`${this.apiUrl}/completed?page=${page}&limit=${limit}&search=${search}&priority=${priority}&titleSearch=${titleSearch}&descriptionSearch=${descriptionSearch}&tagSearch=${tagSearch}`);
   }
 
-  getPendingTasks(page: number, limit: number, search: string = '', priority: string = '', sortBy: string = 'deadline', order: string = 'asc', titleSearch: string = '', descriptionSearch: string = ''): Observable<Tasks> {
-    return this.http.get<Tasks>(`${this.apiUrl}/ongoing?page=${page}&limit=${limit}&search=${search}&priority=${priority}&sortBy=${sortBy}&order=${order}&titleSearch=${titleSearch}&descriptionSearch=${descriptionSearch}`);
+  getPendingTasks(page: number, limit: number, search: string = '', priority: string = '', sortBy: string = 'deadline', order: string = 'asc', titleSearch: string = '', descriptionSearch: string = '', tagSearch: string = ''): Observable<Tasks> {
+    return this.http.get<Tasks>(`${this.apiUrl}/ongoing?page=${page}&limit=${limit}&search=${search}&priority=${priority}&sortBy=${sortBy}&order=${order}&titleSearch=${titleSearch}&descriptionSearch=${descriptionSearch}&tagSearch=${tagSearch}`);
   }
 
   getUserTasks(page: number, limit: number): Observable<Tasks> {

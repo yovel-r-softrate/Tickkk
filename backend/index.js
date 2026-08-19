@@ -25,13 +25,29 @@ connectDB();
 // Middleware
 app.use(helmet()); 
 app.use(cors({
-  origin: process.env.CORS_ORIGIN
-    ? process.env.CORS_ORIGIN.split(',').map(o => o.trim())
-    : '*',
+  origin: process.env.CORS_ORIGIN === '*' 
+    ? '*' 
+    : (process.env.CORS_ORIGIN ? process.env.CORS_ORIGIN.split(',').map(o => o.trim()) : '*'),
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
   allowedHeaders: ['Content-Type', 'Authorization'],
 }));
 app.use(express.json());
+
+// Log requests and responses for debugging 401s
+const fs = require('fs');
+app.use((req, res, next) => {
+  const originalSend = res.send;
+  res.send = function (body) {
+    if (res.statusCode === 401) {
+      const logMsg = `[${new Date().toISOString()}] 401 Error on ${req.method} ${req.url}\n` +
+                     `Headers: ${JSON.stringify(req.headers)}\n` +
+                     `Response Body: ${body}\n\n`;
+      fs.appendFileSync('/Users/yovelr/Softrate/task-management/backend/debug_errors.txt', logMsg);
+    }
+    return originalSend.apply(res, arguments);
+  };
+  next();
+});
 
 // Rate Limiting
 const apiLimiter = rateLimit({

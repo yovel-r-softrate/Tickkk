@@ -15,6 +15,7 @@ export interface Task {
   _id: string
   title: string
   description: string
+  tag?: string
   deadline: string
   priority: string
   completed: boolean

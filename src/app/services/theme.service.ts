@@ -31,7 +31,15 @@ export class ThemeService {
     }
   }
 
-  toggleTheme() {
+  toggleTheme(event?: MouseEvent) {
+    if (event) {
+      document.documentElement.style.setProperty('--theme-click-x', `${event.clientX}px`);
+      document.documentElement.style.setProperty('--theme-click-y', `${event.clientY}px`);
+    } else {
+      document.documentElement.style.setProperty('--theme-click-x', '50%');
+      document.documentElement.style.setProperty('--theme-click-y', '50%');
+    }
+
     const toggle = () => {
       const next = !this.isDarkMode();
       this.isDarkMode.set(next);

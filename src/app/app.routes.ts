@@ -15,30 +15,9 @@ export const routes: Routes = [
     canActivate: [AuthGuard],
   },
   {
-    path: 'register',
-    loadComponent: () =>
-      import('./auth/register/register.component').then(
-        (m) => m.RegisterComponent
-      ),
-  },
-  {
     path: 'login',
     loadComponent: () =>
       import('./auth/login/login.component').then((m) => m.LoginComponent),
-  },
-  {
-    path: 'forgot-password',
-    loadComponent: () =>
-      import('./auth/forgot-password/forgot-password.component').then(
-        (m) => m.ForgotPasswordComponent
-      ),
-  },
-  {
-    path: 'reset-password/:token',
-    loadComponent: () =>
-      import('./auth/reset-password/reset-password.component').then(
-        (m) => m.ResetPasswordComponent
-      ),
   },
   {
     path: 'tasks',
@@ -72,38 +51,7 @@ export const routes: Routes = [
       ),
     canActivate: [AuthGuard],
   },
-  {
-    path: 'users',
-    loadComponent: () =>
-      import('./components/users/users-list/users-list.component').then(
-        (m) => m.UsersListComponent
-      ),
-    canActivate: [AuthGuard, AdminGuard],
-  },
-  {
-    path: 'organizations',
-    loadComponent: () =>
-      import('./components/organizations/organization-list/organization-list.component').then(
-        (m) => m.OrganizationListComponent
-      ),
-    canActivate: [AuthGuard],
-  },
-  {
-    path: 'organizations/new',
-    loadComponent: () =>
-      import('./components/organizations/organization-form/organization-form.component').then(
-        (m) => m.OrganizationFormComponent
-      ),
-    canActivate: [AuthGuard, AdminGuard],
-  },
-  {
-    path: 'organizations/:id',
-    loadComponent: () =>
-      import('./components/organizations/organization-detail/organization-detail.component').then(
-        (m) => m.OrganizationDetailComponent
-      ),
-    canActivate: [AuthGuard],
-  },
+
   {
     path: 'profile',
     loadComponent: () =>

@@ -1,4 +1,4 @@
-import { Component, inject, OnInit, signal } from '@angular/core';
+import { Component, inject, OnInit, signal, computed } from '@angular/core';
 import { TaskService } from '../../../services/task.service';
 import {
   FormBuilder,
@@ -21,13 +21,22 @@ import { AiService } from '../../../services/ai.service';
     templateUrl: './task-form.component.html',
 })
 export class TaskFormComponent {
-  taskForm: FormGroup;
-  priority: string = 'Medium';
-  userId: string = '';
+  taskForm!: FormGroup;
   users: User[] = [];
-  minDate: string = new Date().toISOString().split('T')[0];
-
+  minDateTime: string = '';
+  userSearchQuery = signal<string>('');
+  showUserDropdown = signal<boolean>(false);
   
+  filteredUsers = computed(() => {
+    const query = this.userSearchQuery().toLowerCase().trim();
+    if (!query) return []; // Don't show all initially
+    return this.users.filter(user => 
+      user.name?.toLowerCase().includes(query) || 
+      user.email.toLowerCase().includes(query) ||
+      user.employeeId?.toLowerCase().includes(query)
+    );
+  });
+
   router = inject(Router);
   taskService = inject(TaskService);
   auth = inject(AuthService);
@@ -43,14 +52,30 @@ export class TaskFormComponent {
   });
 
   constructor() {
+    this.minDateTime = this.getLocalISOString(new Date());
     this.taskForm = this.fb.group({
       title: ['', [Validators.required, Validators.minLength(3)]],
       description: ['', [Validators.required, Validators.minLength(3)]],
-      deadline: [this.minDate, Validators.required],
+      tag: [''],
+      deadline: [this.getDefaultDeadline(), Validators.required],
       priority: ['', Validators.required],
       userId: ['', Validators.required],
       subtasks: this.fb.array([])
     });
+  }
+
+  getLocalISOString(date: Date): string {
+    const tzOffset = date.getTimezoneOffset() * 60000;
+    return new Date(date.getTime() - tzOffset).toISOString().slice(0, 16);
+  }
+
+  getDefaultDeadline(): string {
+    const now = new Date();
+    now.setHours(18, 0, 0, 0);
+    if (now.getTime() < Date.now()) {
+      now.setDate(now.getDate() + 1);
+    }
+    return this.getLocalISOString(now);
   }
 
   get subtasks() {
@@ -68,8 +93,57 @@ export class TaskFormComponent {
     this.subtasks.removeAt(index);
   }
 
+  onSubtaskPaste(event: ClipboardEvent, index: number) {
+    const clipboardData = event.clipboardData;
+    if (!clipboardData) return;
+
+    const pastedText = clipboardData.getData('text');
+    if (!pastedText || !pastedText.includes('\n')) return;
+
+    event.preventDefault();
+
+    const lines = pastedText.split(/\r?\n/).map(line => line.trim()).filter(line => line.length > 0);
+    
+    if (lines.length > 0) {
+      this.subtasks.at(index).patchValue({ title: lines[0] });
+
+      for (let i = 1; i < lines.length; i++) {
+        this.subtasks.insert(index + i, this.fb.group({
+          title: [lines[i], Validators.required],
+          completed: [false]
+        }));
+      }
+    }
+  }
+
   ngOnInit() {
     this.loadOrganizationUsers();
+  }
+
+  onUserSearchInput(event: Event) {
+    const value = (event.target as HTMLInputElement).value;
+    this.userSearchQuery.set(value);
+    this.showUserDropdown.set(true);
+    
+    // Invalidate selection if they edit the query
+    const matchedUser = this.users.find(u => (u.name || u.email) === value);
+    if (matchedUser) {
+      this.taskForm.patchValue({ userId: matchedUser._id });
+    } else {
+      this.taskForm.patchValue({ userId: '' });
+    }
+  }
+
+  selectUser(user: any) {
+    this.taskForm.patchValue({ userId: user._id });
+    this.userSearchQuery.set(user.name || user.email);
+    this.showUserDropdown.set(false);
+  }
+
+  closeUserDropdownWithDelay() {
+    setTimeout(() => {
+      this.showUserDropdown.set(false);
+    }, 200);
   }
 
   loadOrganizationUsers() {
@@ -160,7 +234,7 @@ export class TaskFormComponent {
   }
 
   createTask() {
-    if (this.taskForm.invalid) {
+    if (this.taskForm.invalid || this.loading()) {
       return;
     }
     const task = {
@@ -168,6 +242,7 @@ export class TaskFormComponent {
       description: this.taskForm.value.description,
       deadline: this.taskForm.value.deadline,
       priority: this.taskForm.value.priority,
+      tag: this.taskForm.value.tag,
       userId: this.taskForm.value.userId,
       subtasks: this.taskForm.value.subtasks
     };

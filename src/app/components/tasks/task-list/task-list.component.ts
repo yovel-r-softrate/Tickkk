@@ -1,4 +1,4 @@
-import { Component, inject, OnInit, OnDestroy, signal } from '@angular/core';
+import { Component, inject, OnInit, OnDestroy, signal, computed } from '@angular/core';
 import { TaskService } from '../../../services/task.service';
 import { Task } from '../../../core/models/tasks.model';
 import { RouterLink } from '@angular/router';
@@ -19,9 +19,6 @@ export class TaskListComponent implements OnInit, OnDestroy {
   completedTasks = signal<Task[]>([]);
   pendingTasks = signal<Task[]>([]);
 
-  completedPaginatedTasks = signal<Task[]>([]);
-  pendingPaginatedTasks = signal<Task[]>([]);
-
   activeTab = signal<'ongoing' | 'completed'>('ongoing');
 
   completedCurrentPage = signal<number>(1);
@@ -30,16 +27,10 @@ export class TaskListComponent implements OnInit, OnDestroy {
   completedItemsPerPage = signal<number>(10);
   pendingItemsPerPage = signal<number>(10);
 
-  completedTotalPages = signal<number>(0);
-  pendingTotalPages = signal<number>(0);
-
-  // Column search filters
   titleSearch = signal<string>('');
   descriptionSearch = signal<string>('');
+  tagSearch = signal<string>('');
   prioritySearch = signal<string>('');
-
-  completedTotalTasks = signal<number>(0); // Add signal for total completed tasks
-  pendingTotalTasks = signal<number>(0);   // Add signal for total pending tasks
 
   taskService = inject(TaskService);
   auth = inject(AuthService);
@@ -57,6 +48,129 @@ export class TaskListComponent implements OnInit, OnDestroy {
   priorityFilter = signal<string>('');
   sortBy = signal<string>('deadline');
   sortOrder = signal<string>('asc');
+
+  // Computed signals for filtering and sorting tasks client-side
+  filteredPendingTasks = computed(() => {
+    let tasks = this.pendingTasks();
+    const query = this.searchQuery().toLowerCase().trim();
+    const title = this.titleSearch().toLowerCase().trim();
+    const desc = this.descriptionSearch().toLowerCase().trim();
+    const tag = this.tagSearch().toLowerCase().trim();
+    const priority = this.prioritySearch() || this.priorityFilter();
+
+    if (query) {
+      tasks = tasks.filter(t => 
+        t.title.toLowerCase().includes(query) || 
+        t.description.toLowerCase().includes(query)
+      );
+    }
+    if (title) {
+      tasks = tasks.filter(t => t.title.toLowerCase().includes(title));
+    }
+    if (desc) {
+      tasks = tasks.filter(t => t.description.toLowerCase().includes(desc));
+    }
+    if (tag) {
+      tasks = tasks.filter(t => t.tag?.toLowerCase().includes(tag));
+    }
+    if (priority) {
+      tasks = tasks.filter(t => t.priority === priority);
+    }
+
+    // Sort the tasks
+    const sortByField = this.sortBy();
+    const order = this.sortOrder() === 'asc' ? 1 : -1;
+    return [...tasks].sort((a, b) => {
+      let valA = (a as any)[sortByField] || '';
+      let valB = (b as any)[sortByField] || '';
+
+      if (sortByField === 'deadline' || sortByField === 'createdAt') {
+        const dateA = new Date(valA as string).getTime();
+        const dateB = new Date(valB as string).getTime();
+        return (dateA - dateB) * order;
+      }
+      if (sortByField === 'priority') {
+        const priorityOrder: Record<string, number> = { 'Low': 1, 'Medium': 2, 'High': 3, 'Critical': 4 };
+        const orderA = priorityOrder[valA as string] || 0;
+        const orderB = priorityOrder[valB as string] || 0;
+        return (orderA - orderB) * order;
+      }
+      return String(valA).localeCompare(String(valB)) * order;
+    });
+  });
+
+  filteredCompletedTasks = computed(() => {
+    let tasks = this.completedTasks();
+    const query = this.searchQuery().toLowerCase().trim();
+    const title = this.titleSearch().toLowerCase().trim();
+    const desc = this.descriptionSearch().toLowerCase().trim();
+    const tag = this.tagSearch().toLowerCase().trim();
+    const priority = this.prioritySearch() || this.priorityFilter();
+
+    if (query) {
+      tasks = tasks.filter(t => 
+        t.title.toLowerCase().includes(query) || 
+        t.description.toLowerCase().includes(query)
+      );
+    }
+    if (title) {
+      tasks = tasks.filter(t => t.title.toLowerCase().includes(title));
+    }
+    if (desc) {
+      tasks = tasks.filter(t => t.description.toLowerCase().includes(desc));
+    }
+    if (tag) {
+      tasks = tasks.filter(t => t.tag?.toLowerCase().includes(tag));
+    }
+    if (priority) {
+      tasks = tasks.filter(t => t.priority === priority);
+    }
+
+    // Sort the tasks
+    const sortByField = this.sortBy();
+    const order = this.sortOrder() === 'asc' ? 1 : -1;
+    return [...tasks].sort((a, b) => {
+      let valA = (a as any)[sortByField] || '';
+      let valB = (b as any)[sortByField] || '';
+
+      if (sortByField === 'deadline' || sortByField === 'createdAt') {
+        const dateA = new Date(valA as string).getTime();
+        const dateB = new Date(valB as string).getTime();
+        return (dateA - dateB) * order;
+      }
+      if (sortByField === 'priority') {
+        const priorityOrder: Record<string, number> = { 'Low': 1, 'Medium': 2, 'High': 3, 'Critical': 4 };
+        const orderA = priorityOrder[valA as string] || 0;
+        const orderB = priorityOrder[valB as string] || 0;
+        return (orderA - orderB) * order;
+      }
+      return String(valA).localeCompare(String(valB)) * order;
+    });
+  });
+
+  // Computed signals for pagination
+  pendingPaginatedTasks = computed(() => {
+    const tasks = this.filteredPendingTasks();
+    const page = this.pendingCurrentPage();
+    const limit = this.pendingItemsPerPage();
+    const startIndex = (page - 1) * limit;
+    return tasks.slice(startIndex, startIndex + limit);
+  });
+
+  completedPaginatedTasks = computed(() => {
+    const tasks = this.filteredCompletedTasks();
+    const page = this.completedCurrentPage();
+    const limit = this.completedItemsPerPage();
+    const startIndex = (page - 1) * limit;
+    return tasks.slice(startIndex, startIndex + limit);
+  });
+
+  // Computed signals for totals and pages
+  pendingTotalTasks = computed(() => this.filteredPendingTasks().length);
+  completedTotalTasks = computed(() => this.filteredCompletedTasks().length);
+
+  pendingTotalPages = computed(() => Math.ceil(this.filteredPendingTasks().length / this.pendingItemsPerPage()));
+  completedTotalPages = computed(() => Math.ceil(this.filteredCompletedTasks().length / this.completedItemsPerPage()));
 
   private searchTimeout: any;
 
@@ -81,30 +195,17 @@ export class TaskListComponent implements OnInit, OnDestroy {
   }
 
   loadCompletedTasks(page: number, limit: number) {
-    this.completedLoading.set(true);
-    this.taskService.getCompletedTasks(
-      page, 
-      limit, 
-      this.searchQuery(), 
-      this.prioritySearch() || this.priorityFilter(), 
-      this.titleSearch(), 
-      this.descriptionSearch()
-    ).subscribe({
+    if (this.completedTasks().length === 0) {
+      this.completedLoading.set(true);
+    }
+    // Fetch all records for client-side search/filters
+    this.taskService.getCompletedTasks(1, 10000).subscribe({
       next: (response) => {
         if (response.status === 'success' && response.data) {
-          // Set the tasks directly from the response
           this.completedTasks.set(response.data.tasks || []);
-          this.completedTotalPages.set(response.data.totalPages || 1);
-          this.completedCurrentPage.set(response.data.currentPage || 1);
-          this.completedTotalTasks.set(response.data.totalTasks || 0);
-
-          // No need to call updateCompletedPaginatedTasks() here
-          // as we're directly using the paginated data from the API
-          this.completedPaginatedTasks.set(response.data.tasks || []);
         } else {
           this.completedError.set('Invalid response format from server');
         }
-
         this.completedLoading.set(false);
       },
       error: (error) => {
@@ -116,30 +217,17 @@ export class TaskListComponent implements OnInit, OnDestroy {
   }
 
   loadPendingTasks(page: number, limit: number) {
-    this.pendingLoading.set(true);
-    this.taskService.getPendingTasks(
-      page, 
-      limit, 
-      this.searchQuery(), 
-      this.prioritySearch() || this.priorityFilter(), 
-      this.sortBy(), 
-      this.sortOrder(),
-      this.titleSearch(),
-      this.descriptionSearch()
-    ).subscribe({
+    if (this.pendingTasks().length === 0) {
+      this.pendingLoading.set(true);
+    }
+    // Fetch all records for client-side search/filters
+    this.taskService.getPendingTasks(1, 10000).subscribe({
       next: (response) => {
         if (response.status === 'success' && response.data) {
           this.pendingTasks.set(response.data.tasks || []);
-          this.pendingTotalPages.set(response.data.totalPages || 1);
-          this.pendingCurrentPage.set(response.data.currentPage || 1);
-          this.pendingTotalTasks.set(response.data.totalTasks || 0);
-
-          // Directly set the paginated tasks from the API response
-          this.pendingPaginatedTasks.set(response.data.tasks || []);
         } else {
           this.pendingError.set('Invalid response format from server');
         }
-
         this.pendingLoading.set(false);
       },
       error: (error) => {
@@ -151,24 +239,16 @@ export class TaskListComponent implements OnInit, OnDestroy {
   }
 
   loadUserTasks(page: number, limit: number) {
-    // This method is redundant if we use loadPendingTasks for all organizational tasks
-    // But keeping it consistent if specific "My Tasks" view is needed
     this.loadPendingTasks(page, limit);
   }
 
   onFilterChange() {
     this.pendingCurrentPage.set(1);
     this.completedCurrentPage.set(1);
-    this.refreshData();
   }
 
   onSearchChange() {
-    if (this.searchTimeout) {
-      clearTimeout(this.searchTimeout);
-    }
-    this.searchTimeout = setTimeout(() => {
-      this.onFilterChange();
-    }, 400); // 400ms debounce
+    this.onFilterChange();
   }
 
   toggleSortOrder() {
@@ -176,78 +256,31 @@ export class TaskListComponent implements OnInit, OnDestroy {
     this.onFilterChange();
   }
 
-  // These methods are not currently needed since we're using server-side pagination
-  // but kept for potential client-side pagination fallback
-  updateCompletedPaginatedTasks() {
-    const startIndex =
-      (this.completedCurrentPage() - 1) * this.completedItemsPerPage();
-    const endIndex = startIndex + this.completedItemsPerPage();
-    // Update to use the renamed signal
-    this.completedPaginatedTasks.set(
-      this.completedTasks().slice(startIndex, endIndex)
-    );
-  }
-
-  updatePendingPaginatedTasks() {
-    const startIndex =
-      (this.pendingCurrentPage() - 1) * this.pendingItemsPerPage();
-    const endIndex = startIndex + this.pendingItemsPerPage();
-    this.pendingPaginatedTasks.set(
-      this.pendingTasks().slice(startIndex, endIndex)
-    );
-  }
-
   nextCompletedPage() {
     if (this.completedCurrentPage() < this.completedTotalPages()) {
       this.completedCurrentPage.set(this.completedCurrentPage() + 1);
-      this.loadCompletedTasks(
-        this.completedCurrentPage(),
-        this.completedItemsPerPage()
-      );
-    } else {
-      console.log('No more pages to display.');
     }
   }
 
   nextPendingPage() {
     if (this.pendingCurrentPage() < this.pendingTotalPages()) {
       this.pendingCurrentPage.set(this.pendingCurrentPage() + 1);
-      this.loadPendingTasks(
-        this.pendingCurrentPage(),
-        this.pendingItemsPerPage()
-      );
-    } else {
-      console.log('No more pages to display.');
     }
   }
 
   previousCompletedPage() {
     if (this.completedCurrentPage() > 1) {
       this.completedCurrentPage.set(this.completedCurrentPage() - 1);
-      this.loadCompletedTasks(
-        this.completedCurrentPage(),
-        this.completedItemsPerPage()
-      );
-    } else {
-      console.log('Already on the first page.');
     }
   }
 
   previousPendingPage() {
     if (this.pendingCurrentPage() > 1) {
       this.pendingCurrentPage.set(this.pendingCurrentPage() - 1);
-      this.loadPendingTasks(
-        this.pendingCurrentPage(),
-        this.pendingItemsPerPage()
-      );
-    } else {
-      console.log('Already on the first page.');
     }
   }
 
   refreshData() {
-    this.pendingLoading.set(true);
-    this.completedLoading.set(true);
     this.pendingError.set('');
     this.completedError.set('');
 
@@ -276,16 +309,16 @@ export class TaskListComponent implements OnInit, OnDestroy {
   }
 
   toggleTaskStatus(task: Task, completed: boolean) {
-    // Optimistic UI update
-    const previousPending = [...this.pendingPaginatedTasks()];
-    const previousCompleted = [...this.completedPaginatedTasks()];
+    // Optimistic UI update on the raw source signals
+    const previousPending = [...this.pendingTasks()];
+    const previousCompleted = [...this.completedTasks()];
 
     if (completed) {
-      this.pendingPaginatedTasks.set(previousPending.filter(t => t._id !== task._id));
-      this.completedPaginatedTasks.update(tasks => [task, ...tasks]);
+      this.pendingTasks.update(tasks => tasks.filter(t => t._id !== task._id));
+      this.completedTasks.update(tasks => [task, ...tasks]);
     } else {
-      this.completedPaginatedTasks.set(previousCompleted.filter(t => t._id !== task._id));
-      this.pendingPaginatedTasks.update(tasks => [task, ...tasks]);
+      this.completedTasks.update(tasks => tasks.filter(t => t._id !== task._id));
+      this.pendingTasks.update(tasks => [task, ...tasks]);
     }
 
     this.taskService.updateTask(task._id!, { completed }).subscribe({
@@ -294,8 +327,8 @@ export class TaskListComponent implements OnInit, OnDestroy {
       },
       error: (err) => {
         console.error('Failed to update task status', err);
-        this.pendingPaginatedTasks.set(previousPending);
-        this.completedPaginatedTasks.set(previousCompleted);
+        this.pendingTasks.set(previousPending);
+        this.completedTasks.set(previousCompleted);
         this.refreshData();
       }
     });

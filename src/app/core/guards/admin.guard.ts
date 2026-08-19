@@ -1,23 +1,17 @@
-import { inject } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import {
-  ActivatedRouteSnapshot,
-  CanActivateFn,
+  CanActivate,
   Router,
-  RouterStateSnapshot,
 } from '@angular/router';
-import { AuthService } from '../../services/auth.service';
 
-export const AdminGuard: CanActivateFn = (
-  route: ActivatedRouteSnapshot,
-  state: RouterStateSnapshot
-) => {
-  const authService = inject(AuthService);
-  const router = inject(Router);
+@Injectable({
+  providedIn: 'root',
+})
+export class AdminGuard implements CanActivate {
+  router = inject(Router);
 
-  if (authService.isAuthenticated() && (authService.isAdmin() || authService.isSuper())) {
+  canActivate(): boolean {
+    // Flat model: Everyone has admin-level access to tasks within their company
     return true;
-  } else {
-    router.navigate(['/tasks']);
-    return false;
   }
-};
+}

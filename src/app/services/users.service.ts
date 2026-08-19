@@ -12,15 +12,11 @@ export class UsersService {
   private http = inject(HttpClient);
 
   getUsers(): Observable<any> {
-    return this.http.get<any>(`${this.apiUrl}/organization`)
+    return this.http.get<any>(`${this.apiUrl}/organization`);
   }
 
-  getUsersByOrganization(page: number = 1, limit: number = 100): Observable<any> {
-    return this.http.get<any>(`${this.apiUrl}/organization?page=${page}&limit=${limit}`);
-  }
-
-  getAllUsers(page: number = 1, limit: number = 100): Observable<any> {
-    return this.http.get<any>(`${this.apiUrl}?page=${page}&limit=${limit}`);
+  getUsersByOrganization(): Observable<any> {
+    return this.http.get<any>(`${this.apiUrl}/organization`);
   }
 
   getProfile(): Observable<any> {

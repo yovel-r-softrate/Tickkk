@@ -68,12 +68,17 @@ const taskSchema = new mongoose.Schema({
   description: {
     type: String,
   },
+  tag: {
+    type: String,
+    trim: true,
+    default: '',
+  },
   deadline: {
     type: Date,
   },
   priority: {
     type: String,
-    enum: ['Low', 'Medium', 'High'],
+    enum: ['Low', 'Medium', 'High', 'Critical'],
     default: 'Medium',
   },
   completed: {
@@ -81,15 +86,19 @@ const taskSchema = new mongoose.Schema({
     default: false,
   },
   user: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'User',
+    type: String, // HRMS _id
     required: true,
   },
   // Add organization reference
   organization: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'Organization',
+    type: String, // HRMS companyId
     required: true,
+  },
+  assignedByUser: {
+    type: String, // HRMS _id of creator
+  },
+  hrmsCompanyId: {
+    type: String, // Duplicate of organization for clarity
   },
   subtasks: [{
     title: { type: String, required: true },

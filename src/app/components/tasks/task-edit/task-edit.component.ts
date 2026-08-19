@@ -1,4 +1,4 @@
-import { Component, inject, OnInit } from '@angular/core';
+import { Component, inject, OnInit, signal, computed } from '@angular/core';
 import { TaskService } from '../../../services/task.service';
 import { FormArray, FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
@@ -19,10 +19,23 @@ export class TaskEditComponent implements OnInit {
   loading = false;
   usersLoading = false;
   error: string | null = null;
-  minDate: string = new Date().toISOString().split('T')[0];
+  minDateTime: string = '';
   users: User[] = [];
   usersError: string | null = null;
   aiLoading = { subtasks: false, description: false, priority: false };
+
+  userSearchQuery = signal<string>('');
+  showUserDropdown = signal<boolean>(false);
+
+  filteredUsers = computed(() => {
+    const query = this.userSearchQuery().toLowerCase().trim();
+    if (!query) return [];
+    return this.users.filter(user => 
+      user.name?.toLowerCase().includes(query) || 
+      user.email.toLowerCase().includes(query) ||
+      user.employeeId?.toLowerCase().includes(query)
+    );
+  });
 
   router = inject(Router);
   route = inject(ActivatedRoute);
@@ -33,14 +46,21 @@ export class TaskEditComponent implements OnInit {
   aiService = inject(AiService);
 
   constructor() {
+    this.minDateTime = this.getLocalISOString(new Date());
     this.taskForm = this.fb.group({
       title: ['', [Validators.required, Validators.minLength(3)]],
       description: ['', [Validators.required, Validators.minLength(3)]],
+      tag: [''],
       deadline: ['', Validators.required],
       priority: ['', Validators.required],
       userId: ['', Validators.required],
       subtasks: this.fb.array([])
     });
+  }
+
+  getLocalISOString(date: Date): string {
+    const tzOffset = date.getTimezoneOffset() * 60000;
+    return new Date(date.getTime() - tzOffset).toISOString().slice(0, 16);
   }
 
   get subtasks() {
@@ -58,6 +78,29 @@ export class TaskEditComponent implements OnInit {
     this.subtasks.removeAt(index);
   }
 
+  onSubtaskPaste(event: ClipboardEvent, index: number) {
+    const clipboardData = event.clipboardData;
+    if (!clipboardData) return;
+
+    const pastedText = clipboardData.getData('text');
+    if (!pastedText || !pastedText.includes('\n')) return;
+
+    event.preventDefault();
+
+    const lines = pastedText.split(/\r?\n/).map(line => line.trim()).filter(line => line.length > 0);
+    
+    if (lines.length > 0) {
+      this.subtasks.at(index).patchValue({ title: lines[0] });
+
+      for (let i = 1; i < lines.length; i++) {
+        this.subtasks.insert(index + i, this.fb.group({
+          title: [lines[i], Validators.required],
+          completed: [false]
+        }));
+      }
+    }
+  }
+
   ngOnInit() {
     this.taskId = this.route.snapshot.paramMap.get('id') || '';
     this.loading = true;
@@ -68,10 +111,16 @@ export class TaskEditComponent implements OnInit {
         this.taskForm.patchValue({
           title: task.title,
           description: task.description,
-          deadline: new Date(task.deadline).toISOString().split('T')[0],
+          tag: task.tag,
+          deadline: this.getLocalISOString(new Date(task.deadline)),
           priority: task.priority,
           userId: task.user._id,
         });
+
+        if (task.user) {
+          const userObj = task.user as any;
+          this.userSearchQuery.set(userObj.name || userObj.email);
+        }
 
         if (task.subtasks && task.subtasks.length > 0) {
           const subtasksFormArray = this.subtasks;
@@ -93,6 +142,31 @@ export class TaskEditComponent implements OnInit {
     });
 
     this.loadOrganizationUsers();
+  }
+
+  onUserSearchInput(event: Event) {
+    const value = (event.target as HTMLInputElement).value;
+    this.userSearchQuery.set(value);
+    this.showUserDropdown.set(true);
+    
+    const matchedUser = this.users.find(u => (u.name || u.email) === value);
+    if (matchedUser) {
+      this.taskForm.patchValue({ userId: matchedUser._id });
+    } else {
+      this.taskForm.patchValue({ userId: '' });
+    }
+  }
+
+  selectUser(user: any) {
+    this.taskForm.patchValue({ userId: user._id });
+    this.userSearchQuery.set(user.name || user.email);
+    this.showUserDropdown.set(false);
+  }
+
+  closeUserDropdownWithDelay() {
+    setTimeout(() => {
+      this.showUserDropdown.set(false);
+    }, 200);
   }
 
   loadOrganizationUsers() {
@@ -192,6 +266,7 @@ export class TaskEditComponent implements OnInit {
       description: this.taskForm.value.description,
       deadline: this.taskForm.value.deadline,
       priority: this.taskForm.value.priority,
+      tag: this.taskForm.value.tag,
       userId: this.taskForm.value.userId,
       subtasks: this.taskForm.value.subtasks
     };

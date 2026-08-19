@@ -1,11 +1,18 @@
 <div class="max-w-xl mx-auto m-12 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl shadow-sm p-8 space-y-6">
   <!-- Profile Header -->
   <div class="flex items-center space-x-5 border-b border-gray-200 dark:border-gray-800 pb-6">
-    <div class="h-16 w-16 rounded-full bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 flex items-center justify-center text-gray-550 dark:text-gray-400">
-      <i class="far fa-user text-2xl"></i>
+    <div class="h-16 w-16 rounded-full bg-brand-50 dark:bg-brand-950/20 border border-brand-200 dark:border-brand-900/30 flex items-center justify-center text-brand-600 dark:text-brand-400 text-2xl font-bold">
+      {{ profile()?.name ? profile()?.name.charAt(0).toUpperCase() : 'U' }}
     </div>
     <div>
-      <h2 class="text-xl font-semibold text-gray-950 dark:text-white uppercase tracking-wider">My Profile</h2>
+      <h2 class="text-xl font-bold text-gray-905 dark:text-white tracking-tight flex items-center gap-2">
+        {{ profile()?.name || 'My Profile' }}
+        @if (profile()?.type) {
+          <span class="inline-flex items-center px-2 py-0.5 text-xs font-semibold rounded bg-blue-50 text-blue-700 dark:bg-blue-950/20 dark:text-blue-400 border border-blue-200/30">
+            {{ profile()?.type }}
+          </span>
+        }
+      </h2>
       <p class="text-sm text-gray-500 dark:text-gray-400 mt-0.5">{{ profile()?.email }}</p>
     </div>
   </div>
@@ -17,7 +24,7 @@
     </div>
   }
   @else if (error()) {
-    <div class="rounded-xl border border-red-205 bg-red-50/50 p-4 text-red-800 text-sm text-center">
+    <div class="rounded-xl border border-red-200 bg-red-50/50 p-4 text-red-800 text-sm text-center">
       <p class="font-semibold">Error Loading Profile</p>
       <p class="text-xs opacity-90 mt-1">{{ error() }}</p>
     </div>
@@ -25,27 +32,40 @@
   @else if (profile()) {
     <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 text-sm">
       <div class="space-y-1">
-        <div class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Workspace Role</div>
-        <div class="font-medium text-gray-900 dark:text-white capitalize">{{ profile().role }}</div>
+        <div class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Employee ID</div>
+        <div class="font-medium text-gray-900 dark:text-white font-mono">{{ profile().employeeId || 'N/A' }}</div>
       </div>
-      @if (profile().organization) {
-        <div class="space-y-1">
-          <div class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Organization</div>
-          <div class="font-medium text-gray-900 dark:text-white">{{ profile().organization.name }}</div>
+      
+      <div class="space-y-1">
+        <div class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Designation / Role</div>
+        <div class="font-medium text-gray-900 dark:text-white">{{ profile().role || 'N/A' }}</div>
+      </div>
+
+      <div class="space-y-1">
+        <div class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Department</div>
+        <div class="font-medium text-gray-900 dark:text-white">{{ profile().department || 'N/A' }}</div>
+      </div>
+
+      <div class="space-y-1">
+        <div class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Contact Phone</div>
+        <div class="font-medium text-gray-900 dark:text-white">{{ profile().phone || 'N/A' }}</div>
+      </div>
+
+      <div class="space-y-1">
+        <div class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Onboarding Date</div>
+        <div class="font-medium text-gray-900 dark:text-white">
+          @if (profile().onboardingDate) {
+            {{ profile().onboardingDate | date:'longDate' }}
+          } @else {
+            N/A
+          }
         </div>
-      }
-      @if (profile().organizationRole) {
-        <div class="space-y-1">
-          <div class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Organization Role</div>
-          <div class="font-medium text-gray-900 dark:text-white capitalize">{{ profile().organizationRole }}</div>
-        </div>
-      }
-      @if (profile().joinedAt) {
-        <div class="space-y-1">
-          <div class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Joined Date</div>
-          <div class="font-medium text-gray-900 dark:text-white">{{ profile().joinedAt | date:'mediumDate' }}</div>
-        </div>
-      }
+      </div>
+
+      <div class="space-y-1">
+        <div class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Account Status</div>
+        <div class="font-medium text-gray-900 dark:text-white capitalize">{{ profile().status || 'Active' }}</div>
+      </div>
     </div>
   }
 </div>

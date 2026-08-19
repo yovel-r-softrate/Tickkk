@@ -8,7 +8,7 @@ module.exports = {
   init: (httpServer) => {
     io = new Server(httpServer, {
       cors: {
-        origin: process.env.CORS_ORIGIN ? process.env.CORS_ORIGIN.split(',').map(o => o.trim()) : '*',
+        origin: process.env.CORS_ORIGIN === '*' ? '*' : (process.env.CORS_ORIGIN ? process.env.CORS_ORIGIN.split(',').map(o => o.trim()) : '*'),
         methods: ["GET", "POST", "PUT", "DELETE", "PATCH"]
       }
     });
@@ -20,8 +20,14 @@ module.exports = {
         return next(new Error("Authentication error: No token provided"));
       }
       try {
-        const decoded = jwt.verify(token, process.env.JWT_SECRET);
-        socket.user = decoded; // decoded contains { _id: ... }
+        const decoded = jwt.decode(token);
+        if (!decoded) throw new Error("Invalid token format");
+        
+        const userData = decoded.user || decoded;
+        if (!userData || (!userData.id && !userData._id)) throw new Error("Invalid token structure");
+        
+        socket.user = userData;
+        socket.user.id = userData.id || userData._id;
         next();
       } catch (err) {
         next(new Error("Authentication error: Invalid token"));

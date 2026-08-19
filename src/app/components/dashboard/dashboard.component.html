@@ -116,7 +116,7 @@
                   <div class="flex items-center gap-3 text-xs text-gray-400 dark:text-gray-500">
                     <span class="flex items-center gap-1">
                       <i class="far fa-calendar-alt text-xs"></i>
-                      Due {{ task.deadline | date:'mediumDate' }}
+                      Due {{ task.deadline | date:'MMM d, y, h:mm a' }}
                     </span>
                     @if (task.subtasks && task.subtasks.length > 0) {
                       <span class="flex items-center gap-1">
