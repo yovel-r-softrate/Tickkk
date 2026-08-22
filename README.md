@@ -153,3 +153,13 @@ A full-stack task management application built with Angular 19, Node.js, Express
 ## License
 
 This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
+
+---
+
+## VPS Deployment Config
+**MongoDB Remote Access Credentials:**
+- Host: `193.203.161.48`
+- Port: `27028`
+- User: `tickksoft22aug`
+- Pass: `Softrate@tickk22`
+- Auth DB: `admin`

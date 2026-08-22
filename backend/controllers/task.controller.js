@@ -78,6 +78,7 @@ exports.createTask = async (req, res) => {
 
     successResponse(res, 201, "Task created successfully");
   } catch (error) {
+    console.error("API ERROR:", error);
     errorResponse(res, 500, error.message);
   }
 };
@@ -116,6 +117,7 @@ exports.getAllTasks = async (req, res) => {
       currentPage: page
     });
   } catch (error) {
+    console.error("API ERROR:", error);
     errorResponse(res, 500, error.message);
   }
 };
@@ -200,6 +202,7 @@ exports.getOngoingTasks = async (req, res) => {
       currentPage: page,
     });
   } catch (error) {
+    console.error("API ERROR:", error);
     errorResponse(res, 500, error.message);
   }
 };
@@ -279,6 +282,7 @@ exports.getCompletedTasks = async (req, res) => {
       currentPage: page,
     });
   } catch (error) {
+    console.error("API ERROR:", error);
     errorResponse(res, 500, error.message);
   }
 };
@@ -302,6 +306,7 @@ exports.getAllTasksForUser = async (req, res) => {
       currentPage: page,
     });
   } catch (error) {
+    console.error("API ERROR:", error);
     errorResponse(res, 500, error.message);
   }
 };
@@ -333,6 +338,7 @@ exports.getTaskById = async (req, res) => {
 
     successResponse(res, 200, "Task retrieved successfully", task);
   } catch (error) {
+    console.error("API ERROR:", error);
     errorResponse(res, 500, error.message);
   }
 };
@@ -390,6 +396,7 @@ exports.updateTask = async (req, res) => {
 
     return successResponse(res, 200, "Task updated successfully", updatedTask);
   } catch (error) {
+    console.error("API ERROR:", error);
     return errorResponse(res, 500, error.message);
   }
 };
@@ -428,6 +435,7 @@ exports.deleteTask = async (req, res) => {
     
     successResponse(res, 200, "Task deleted successfully");
   } catch (error) {
+    console.error("API ERROR:", error);
     errorResponse(res, 500, error.message);
   }
 };
@@ -472,6 +480,7 @@ exports.getTaskStats = async (req, res) => {
 
     successResponse(res, 200, "Stats retrieved successfully", result);
   } catch (error) {
+    console.error("API ERROR:", error);
     errorResponse(res, 500, error.message);
   }
 };
@@ -508,6 +517,7 @@ exports.getTaskActivities = async (req, res) => {
 
     successResponse(res, 200, "Activities retrieved successfully", activities);
   } catch (error) {
+    console.error("API ERROR:", error);
     errorResponse(res, 500, error.message);
   }
 };

@@ -12,6 +12,7 @@ dotenv.config();
 
 // Initialize Express app
 const app = express();
+app.set('trust proxy', 1);
 const http = require('http');
 const server = http.createServer(app);
 
