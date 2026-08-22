@@ -209,7 +209,7 @@
                   @for (user of filteredUsers(); track user._id) {
                     <button 
                       type="button" 
-                      (click)="selectUser(user)"
+                      (mousedown)="selectUser(user)"
                       class="w-full text-left px-4 py-2.5 text-xs text-gray-700 dark:text-gray-200 hover:bg-brand-50 dark:hover:bg-brand-950/20 transition-colors border-b border-gray-100 last:border-0 dark:border-gray-800"
                     >
                       <div class="font-semibold">{{ user.name }}</div>

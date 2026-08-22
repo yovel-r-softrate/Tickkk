@@ -12,6 +12,16 @@ export class TaskService {
   private apiUrl = `${environment.apiUrl}/tasks`;
   private http = inject(HttpClient);
 
+  // Cache for tasks
+  private pendingTasksCache: SingleTask[] | null = null;
+  private completedTasksCache: SingleTask[] | null = null;
+
+  getPendingTasksCache(): SingleTask[] | null { return this.pendingTasksCache; }
+  setPendingTasksCache(tasks: SingleTask[]): void { this.pendingTasksCache = tasks; }
+
+  getCompletedTasksCache(): SingleTask[] | null { return this.completedTasksCache; }
+  setCompletedTasksCache(tasks: SingleTask[]): void { this.completedTasksCache = tasks; }
+
   createTask(task: any): Observable<any> {
     return this.http.post<any>(this.apiUrl, task);
   }

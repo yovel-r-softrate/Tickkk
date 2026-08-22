@@ -177,6 +177,12 @@ export class TaskListComponent implements OnInit, OnDestroy {
   constructor() {}
 
   ngOnInit() {
+    const cachedCompleted = this.taskService.getCompletedTasksCache();
+    if (cachedCompleted) this.completedTasks.set(cachedCompleted as any);
+
+    const cachedPending = this.taskService.getPendingTasksCache();
+    if (cachedPending) this.pendingTasks.set(cachedPending as any);
+
     this.refreshData();
     
     this.subscriptions.add(this.wsService.taskCreated$.subscribe(() => {
@@ -202,7 +208,9 @@ export class TaskListComponent implements OnInit, OnDestroy {
     this.taskService.getCompletedTasks(1, 10000).subscribe({
       next: (response) => {
         if (response.status === 'success' && response.data) {
-          this.completedTasks.set(response.data.tasks || []);
+          const tasks = response.data.tasks || [];
+          this.completedTasks.set(tasks);
+          this.taskService.setCompletedTasksCache(tasks as any);
         } else {
           this.completedError.set('Invalid response format from server');
         }
@@ -224,7 +232,9 @@ export class TaskListComponent implements OnInit, OnDestroy {
     this.taskService.getPendingTasks(1, 10000).subscribe({
       next: (response) => {
         if (response.status === 'success' && response.data) {
-          this.pendingTasks.set(response.data.tasks || []);
+          const tasks = response.data.tasks || [];
+          this.pendingTasks.set(tasks);
+          this.taskService.setPendingTasksCache(tasks as any);
         } else {
           this.pendingError.set('Invalid response format from server');
         }
